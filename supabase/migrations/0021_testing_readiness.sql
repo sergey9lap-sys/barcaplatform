@@ -44,7 +44,7 @@ create table if not exists public.user_notifications (
 
 create table if not exists public.la_masia_watchlist (
   user_id uuid not null references public.profiles (id) on delete cascade,
-  player_id uuid not null references public.la_masia_players (id) on delete cascade,
+  player_id text not null references public.la_masia_players (id) on delete cascade,
   verdict text check (verdict is null or verdict in ('Готов к основе','Взять на сборы','Нужна аренда','Пока рано')),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),

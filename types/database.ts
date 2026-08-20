@@ -146,6 +146,7 @@ export interface LaMasiaPlayerRecord {
   name: string;
   age: number;
   position: string;
+  image_url: string | null;
   team_level: LaMasiaTeamLevel;
   potential_score: number;
   first_team_chance: number;
@@ -153,6 +154,7 @@ export interface LaMasiaPlayerRecord {
   barca_fit_score: number;
   status: LaMasiaStatus;
   short_description: string;
+  priority?: number;
 }
 
 export interface AnalyticsPlayerRecord {

@@ -10,6 +10,7 @@ import { mockPlayerRankings } from "@/lib/mocks/player-rankings";
 import { mockManualPlayerSeasonStatsWithUsefulness } from "@/lib/mocks/player-season-stats";
 import { mockTransferRumors } from "@/lib/mocks/transfer-rumors";
 import { mockTransferIdeas } from "@/lib/mocks/transfer-ideas";
+import { mockLaMasiaPlayers } from "@/lib/mocks/la-masia";
 import { getMockChallenges } from "@/lib/mocks/challenges";
 import { buildSeasonPlayerStats } from "@/lib/player-rankings/stats";
 import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
@@ -18,6 +19,7 @@ import type {
   DuelRecord,
   ChallengeRecord,
   LeaderboardEntry,
+  LaMasiaPlayerRecord,
   LeagueStanding,
   LineupPredictionRecord,
   ManualPlayerSeasonStat,
@@ -215,6 +217,22 @@ export async function getChallenges(includeUnpublished = false) {
   const { data, error } = await query;
   if (error || !data?.length) return getMockChallenges(matches);
   return data as ChallengeRecord[];
+}
+
+export async function getLaMasiaPlayers() {
+  noStore();
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) return mockLaMasiaPlayers;
+
+  const { data, error } = await supabase
+    .from("la_masia_players")
+    .select("*")
+    .eq("is_active", true)
+    .order("priority", { ascending: false })
+    .order("potential_score", { ascending: false });
+
+  if (error || !data?.length) return mockLaMasiaPlayers;
+  return data as LaMasiaPlayerRecord[];
 }
 
 export async function getMatchById(matchId: string) {

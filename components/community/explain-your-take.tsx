@@ -66,7 +66,7 @@ export function ExplainYourTake({ targetType, targetId }: ExplainYourTakeProps) 
     <Card className="soft-panel">
       <CardContent className="space-y-4 p-4">
         <div>
-          <p className="meta-label text-xs">Explain your take</p>
+          <p className="meta-label text-xs">Аргумент болельщика</p>
           <p className="ui-value mt-1 text-lg font-semibold">Объясни своё мнение</p>
         </div>
         <textarea

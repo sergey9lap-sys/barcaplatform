@@ -1,14 +1,16 @@
 "use client";
 
 import { BrainCircuit, Crosshair, ShieldCheck, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { defaultMasteryTracks, getMasteryLevel, getOverallXp } from "@/lib/community/mastery";
+import { loadMasteryTracks } from "@/lib/community/mastery-storage";
 
 export function FootballIntelligenceProfile() {
-  const tracks = defaultMasteryTracks;
+  const [tracks, setTracks] = useState(defaultMasteryTracks);
+  useEffect(() => { void loadMasteryTracks().then(setTracks); }, []);
   const totalXp = useMemo(() => getOverallXp(tracks), [tracks]);
   const accountLevel = Math.floor(totalXp / 750) + 1;
   const nextLevelProgress = Math.round(((totalXp % 750) / 750) * 100);

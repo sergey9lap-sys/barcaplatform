@@ -7,25 +7,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPlayerAvatarPath } from "@/lib/assets";
+import { loadFantasyTeam, saveFantasyTeam } from "@/lib/fantasy/storage";
 import type { Match, MatchPlayer } from "@/types/database";
 
 const BUDGET = 50;
-const STORAGE_PREFIX = "barca-fantasy-v1";
 const starPrices: Record<string, number> = { "Ламин Ямаль": 14, "Рафинья": 13, "Педри": 12, "Родри": 12, "Дани Ольмо": 11, "Энтони Гордон": 10, "Карим Адейеми": 10, "Жоау Канселу": 9 };
 const priceFor = (player: MatchPlayer) => starPrices[player.player_name] ?? (player.position === "GK" ? 6 : player.position === "DF" ? 7 : 8);
 
 export function FantasyManagerClient({ match, players }: { match: Match; players: MatchPlayer[] }) {
-  const key = `${STORAGE_PREFIX}:${match.id}`;
   const [selected, setSelected] = useState<string[]>([]);
   const [captain, setCaptain] = useState("");
   const [saved, setSaved] = useState(false);
   const locked = new Date() >= new Date(match.kickoff_at);
 
   useEffect(() => {
-    const raw = localStorage.getItem(key);
-    if (!raw) return;
-    try { const value = JSON.parse(raw) as { selected?: string[]; captain?: string }; setSelected(value.selected ?? []); setCaptain(value.captain ?? ""); setSaved(true); } catch { localStorage.removeItem(key); }
-  }, [key]);
+    void loadFantasyTeam(match.id).then((value) => {
+      if (!value) return;
+      setSelected(value.selected ?? []);
+      setCaptain(value.captain ?? "");
+      setSaved(true);
+    });
+  }, [match.id]);
 
   const squad = useMemo(() => players.filter((player) => player.position !== "COACH"), [players]);
   const spent = selected.reduce((sum, id) => { const player = squad.find((item) => item.id === id); return sum + (player ? priceFor(player) : 0); }, 0);
@@ -39,9 +41,9 @@ export function FantasyManagerClient({ match, players }: { match: Match; players
     setSelected((items) => [...items, player.id]); setSaved(false);
   }
 
-  function save() {
+  async function save() {
     if (!complete || locked) return;
-    localStorage.setItem(key, JSON.stringify({ matchId: match.id, selected, captain, budget: BUDGET, savedAt: new Date().toISOString(), lockedAt: match.kickoff_at }));
+    await saveFantasyTeam(match.id, { selected, captain, budgetSpent: spent, savedAt: new Date().toISOString() }, match.kickoff_at);
     setSaved(true);
   }
 
@@ -56,7 +58,7 @@ export function FantasyManagerClient({ match, players }: { match: Match; players
           {active ? <button type="button" onClick={() => { setCaptain(player.id); setSaved(false); }} className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs transition-colors ${captain === player.id ? "border-amber-300/40 bg-amber-400/15 text-amber-100" : "border-white/10 bg-white/[0.03] text-blue-100/65"}`}><Crown className="h-3.5 w-3.5" />{captain === player.id ? "Капитан x2" : "Назначить капитаном"}</button> : null}
         </div>;
       })}</div>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/15 p-4"><div className="flex items-center gap-2 text-sm ui-note">{locked ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}{complete ? "Команда готова" : "Выберите 5 игроков и капитана"}</div><Button disabled={!complete || locked} onClick={save}><Save className="mr-2 h-4 w-4" />{saved ? "Состав сохранён" : "Сохранить состав"}</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/15 p-4"><div className="flex items-center gap-2 text-sm ui-note">{locked ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}{complete ? "Команда готова к синхронизации" : "Выберите 5 игроков и капитана"}</div><Button disabled={!complete || locked} onClick={() => void save()}><Save className="mr-2 h-4 w-4" />{saved ? "Состав сохранён" : "Сохранить состав"}</Button></div>
     </CardContent></Card>
     <div className="grid gap-4 lg:grid-cols-3"><League title="Недельная лига" place="#14" players="1 284" /><League title="Месячная лига" place="#39" players="4 610" /><League title="Приватная лига" place="Создать" players="для друзей" /></div>
   </div>;

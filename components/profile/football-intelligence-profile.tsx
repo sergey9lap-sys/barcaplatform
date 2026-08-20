@@ -22,13 +22,13 @@ export function FootballIntelligenceProfile() {
           <div>
             <div className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-blue-300" /><p className="meta-label text-xs">Футбольный интеллект</p></div>
             <h3 className="mt-2 text-2xl font-semibold">Уровень {accountLevel} · Тактический архитектор</h3>
-            <p className="ui-note mt-2 max-w-2xl text-sm">Общий уровень складывается из проверенных результатов во всех режимах. Ошибка не отнимает XP, но влияет на точность конкретного навыка.</p>
+            <p className="ui-note mt-2 max-w-2xl text-sm">Общий уровень складывается из проверенных результатов во всех режимах. Ошибка не отнимает опыт, но влияет на точность конкретного навыка.</p>
           </div>
-          <Badge variant="accent">{totalXp.toLocaleString("ru-RU")} XP</Badge>
+          <Badge variant="accent">{totalXp.toLocaleString("ru-RU")} опыта</Badge>
         </div>
 
         <div>
-          <div className="mb-2 flex justify-between text-xs"><span className="ui-note">До уровня {accountLevel + 1}</span><span className="ui-value">{750 - (totalXp % 750)} XP</span></div>
+          <div className="mb-2 flex justify-between text-xs"><span className="ui-note">До уровня {accountLevel + 1}</span><span className="ui-value">{750 - (totalXp % 750)} опыта</span></div>
           <div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-[#2f72ff] via-[#6940c7] to-[#bd234f]" style={{ width: `${nextLevelProgress}%` }} /></div>
         </div>
 
@@ -43,16 +43,16 @@ export function FootballIntelligenceProfile() {
                   <span className="rounded-full border border-blue-300/20 bg-blue-400/10 px-2 py-1 text-xs text-blue-100">ур. {getMasteryLevel(track.xp)}</span>
                 </div>
                 <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-rose-500" style={{ width: `${progress}%` }} /></div>
-                <div className="mt-3 flex justify-between text-xs"><span className="ui-note">{track.xp} XP</span><span className="ui-value">Точность {accuracy}%</span></div>
+                <div className="mt-3 flex justify-between text-xs"><span className="ui-note">{track.xp} опыта</span><span className="ui-value">Точность {accuracy}%</span></div>
               </div>
             );
           })}
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
-          <Rule icon={ShieldCheck} title="Только подтверждённое" text="XP начисляется после официального результата." />
-          <Rule icon={Crosshair} title="Без штрафа XP" text="Ошибки меняют точность, прогресс не сгорает." />
-          <Rule icon={Sparkles} title="Без спама" text="Комментарии, клики и покупки XP не дают." />
+          <Rule icon={ShieldCheck} title="Только подтверждённое" text="Опыт начисляется после официального результата." />
+          <Rule icon={Crosshair} title="Без штрафа опыта" text="Ошибки меняют точность, прогресс не сгорает." />
+          <Rule icon={Sparkles} title="Без спама" text="Комментарии, клики и покупки не дают опыт." />
         </div>
       </CardContent>
     </Card>

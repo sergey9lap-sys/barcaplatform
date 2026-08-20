@@ -32,7 +32,7 @@ export function DailyChallengeCard({ challenge, compact = false }: { challenge: 
       <CardContent className="space-y-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="meta-label text-xs">{challenge.type}</p>
+            <p className="meta-label text-xs">{challenge.type === "Transfer Battle" ? "Трансферная битва" : challenge.type === "La Masia Pick" ? "Выбор Ла Масии" : challenge.type}</p>
             <h3 className="mt-2 text-xl font-semibold">{challenge.title}</h3>
             <p className="ui-note mt-2 text-sm">{challenge.description}</p>
           </div>

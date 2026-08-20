@@ -266,7 +266,7 @@ function RewardCard({
         {item.expiresLabel ? <p className="ui-note text-xs">{item.expiresLabel}</p> : null}
 
         <div className="flex items-center justify-between gap-3">
-          <p className="ui-value text-lg font-semibold">{item.pricePoints} points</p>
+          <p className="ui-value text-lg font-semibold">{item.pricePoints} очков</p>
           {item.stock != null ? <p className="meta-label text-xs">остаток {Math.max(0, item.stock - (owned ? 1 : 0))}</p> : null}
         </div>
 
@@ -334,7 +334,7 @@ function OwnedView({ history, items }: { history: PurchaseHistoryRecord[]; items
                 <p className="ui-value mt-2 text-lg font-semibold">{purchase.title}</p>
                 <p className="ui-note mt-1 text-sm">{purchase.status}</p>
               </div>
-              <Badge variant={item?.rarity === "legendary" || item?.rarity === "ultra_legendary" ? "primary" : "accent"}>{purchase.pricePoints} points</Badge>
+              <Badge variant={item?.rarity === "legendary" || item?.rarity === "ultra_legendary" ? "primary" : "accent"}>{purchase.pricePoints} очков</Badge>
             </CardContent>
           </Card>
         );

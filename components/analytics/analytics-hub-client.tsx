@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CommunityConsensus } from "@/components/community/community-consensus";
 import { ExplainYourTake } from "@/components/community/explain-your-take";
 import type { AnalyticsPlayerRecord } from "@/types/database";
+import { getPlayerAvatarPath } from "@/lib/assets";
 
 const metricLabels = [
   ["technique", "Техника"],
@@ -45,8 +46,7 @@ export function AnalyticsHubClient({ players }: { players: AnalyticsPlayerRecord
               onClick={() => setSelectedId(player.id)}
               className={selectedId === player.id ? "spotlight-strip text-left" : "soft-panel p-4 text-left"}
             >
-              <p className="meta-label text-xs">{player.source_label} · {player.position}</p>
-              <p className="ui-value mt-2 text-lg font-semibold">{player.name}</p>
+              <div className="flex items-center gap-3"><div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[.04]">{getPlayerAvatarPath(player.name) ? <img src={getPlayerAvatarPath(player.name)!} alt={player.name} className="h-full w-full object-cover object-top" /> : <span className="grid h-full w-full place-items-center font-semibold">{player.name.slice(0, 2)}</span>}</div><div><p className="meta-label text-xs">{player.source_label} · {player.position}</p><p className="ui-value mt-1 text-lg font-semibold">{player.name}</p></div></div>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <CompactMetric label="Тренер" value={player.coach_compatibility} />
                 <CompactMetric label="Барса" value={player.barca_compatibility} />
@@ -59,10 +59,13 @@ export function AnalyticsHubClient({ players }: { players: AnalyticsPlayerRecord
       {selected ? (
         <Card className="barca-panel border-accent/15">
           <CardContent className="space-y-4 p-5">
-            <div>
+            <div className="flex items-center gap-4">
+              {getPlayerAvatarPath(selected.name) ? <img src={getPlayerAvatarPath(selected.name)!} alt={selected.name} className="h-20 w-20 rounded-3xl border border-white/10 object-cover object-top" /> : null}
+              <div>
               <p className="meta-label text-xs">Аналитическая карточка</p>
               <h3 className="mt-2 text-2xl font-semibold">{selected.name}</h3>
               <p className="ui-note mt-1 text-sm">{selected.source_label} · {selected.position}</p>
+              </div>
             </div>
 
             <div className="grid gap-3">

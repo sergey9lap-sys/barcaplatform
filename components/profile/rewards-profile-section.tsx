@@ -38,7 +38,7 @@ export function RewardsProfileSection() {
                       <p className="ui-value text-sm font-semibold">{purchase.title}</p>
                       <p className="ui-note mt-1 text-xs">{purchase.category} · {purchase.purchasedAt}</p>
                     </div>
-                    <Badge variant="accent">{purchase.pricePoints} points</Badge>
+                    <Badge variant="accent">{purchase.pricePoints} очков</Badge>
                   </div>
                   <p className="ui-note mt-2 text-xs">{purchase.status}</p>
                   {purchase.status === "physical pending" ? (
@@ -55,18 +55,18 @@ export function RewardsProfileSection() {
 
       <Card className="soft-panel">
         <CardContent className="space-y-4 p-5">
-          <p className="meta-label text-xs">Wishlist</p>
+          <p className="meta-label text-xs">Список желаний</p>
           {wishlist.length ? (
             <div className="grid gap-3 sm:grid-cols-2">
               {wishlist.map((item) => (
                 <div key={item.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                   <p className="ui-value text-sm font-semibold">{item.title}</p>
-                  <p className="ui-note mt-1 text-xs">{item.pricePoints} points · {item.rarity}</p>
+                  <p className="ui-note mt-1 text-xs">{item.pricePoints} очков · {item.rarity === "legendary" ? "легендарная" : item.rarity === "rare" ? "редкая" : "обычная"}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="ui-note text-sm">Wishlist пуст. Добавьте награды сердечком в магазине.</p>
+            <p className="ui-note text-sm">Список желаний пуст. Добавьте награды сердечком в магазине.</p>
           )}
         </CardContent>
       </Card>

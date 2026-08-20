@@ -16,6 +16,7 @@ export interface Profile {
   total_points: number;
   is_admin: boolean;
   created_at: string;
+  avatar_url?: string | null;
 }
 
 export interface Match {

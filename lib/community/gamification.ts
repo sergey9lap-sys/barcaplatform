@@ -42,13 +42,13 @@ export function calculateLevel(xp: number) {
 }
 
 export function getRankTitle(level: number) {
-  if (level <= 3) return "Academy Fan";
-  if (level <= 7) return "Culé Rookie";
-  if (level <= 12) return "Barca Analyst";
-  if (level <= 18) return "Tactical Scout";
-  if (level <= 25) return "La Masia Expert";
-  if (level <= 35) return "Elite Culé";
-  return "Camp Nou Legend";
+  if (level <= 3) return "Новичок академии";
+  if (level <= 7) return "Начинающий кулес";
+  if (level <= 12) return "Аналитик Барсы";
+  if (level <= 18) return "Тактический скаут";
+  if (level <= 25) return "Эксперт Ла Масии";
+  if (level <= 35) return "Элита кулес";
+  return "Легенда Камп Ноу";
 }
 
 export function addReputation(type: ReputationType, amount: number) {
@@ -57,12 +57,12 @@ export function addReputation(type: ReputationType, amount: number) {
 
 export function getPrimaryRole(user: Pick<CommunityUserRecord, "analyst_reputation" | "scout_reputation" | "transfer_reputation" | "tactical_reputation" | "prediction_accuracy">) {
   const roles = [
-    { label: "Analyst", value: user.analyst_reputation },
-    { label: "Scout", value: user.scout_reputation },
-    { label: "Transfer Guru", value: user.transfer_reputation },
-    { label: "Tactical Expert", value: user.tactical_reputation },
-    { label: "Prediction Master", value: user.prediction_accuracy },
+    { label: "Аналитик", value: user.analyst_reputation },
+    { label: "Скаут", value: user.scout_reputation },
+    { label: "Трансферный эксперт", value: user.transfer_reputation },
+    { label: "Тактический стратег", value: user.tactical_reputation },
+    { label: "Мастер прогнозов", value: user.prediction_accuracy },
   ];
 
-  return roles.sort((a, b) => b.value - a.value)[0]?.label ?? "Analyst";
+  return roles.sort((a, b) => b.value - a.value)[0]?.label ?? "Аналитик";
 }

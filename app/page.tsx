@@ -146,7 +146,7 @@ export default async function HomePage() {
         <div className="grid gap-3 md:grid-cols-2">
           <CommunityConsensus
             options={[
-              { label: "Купить Нико", votes: 58 },
+              { label: "Брать Лукеба", votes: 58 },
               { label: "Следить", votes: 21 },
               { label: "Слишком рискованно", votes: 12 },
               { label: "Не покупать", votes: 9 },
@@ -154,7 +154,7 @@ export default async function HomePage() {
           />
           <HomeFeatureCard
             label="Спор дня о трансферах"
-            title="Нико Уильямс: брать сейчас или ждать?"
+            title="Кастелло Лукеба: брать сейчас или ждать?"
             text="Сообщество спорит о цене, роли слева и прессинг-совместимости."
             href="/transfers"
             cta="К обсуждению"

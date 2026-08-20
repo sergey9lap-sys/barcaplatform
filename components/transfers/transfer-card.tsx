@@ -5,6 +5,7 @@ import type { TransferPredictionRecord, TransferRumor } from "@/types/database";
 import { TransferPredictionForm } from "@/components/transfers/transfer-prediction-form";
 import { CommunityConsensus } from "@/components/community/community-consensus";
 import { ExplainYourTake } from "@/components/community/explain-your-take";
+import { getPlayerAvatarPath } from "@/lib/assets";
 
 interface TransferCardProps {
   rumor: TransferRumor;
@@ -19,16 +20,20 @@ export function TransferCard({
   userId = null,
   backendEnabled = false,
 }: TransferCardProps) {
+  const playerImage = getPlayerAvatarPath(rumor.player_name, rumor.image_url);
   return (
     <Card className="barca-panel border-accent/15">
       <CardHeader className="space-y-4">
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-3xl border border-white/10 bg-white/[.04]">{playerImage ? <img src={playerImage} alt={rumor.player_name} className="h-full w-full object-cover object-top" /> : <span className="grid h-full w-full place-items-center text-lg font-semibold">{rumor.player_name.slice(0, 2)}</span>}</div>
+            <div>
             <p className="meta-label text-xs">{rumor.window_label} · {formatTransferDirection(rumor.direction)}</p>
             <CardTitle className="mt-2 text-xl">{rumor.player_name}</CardTitle>
             <p className="ui-note mt-1 text-sm">
               {[rumor.position, rumor.age ? `${rumor.age} лет` : null, rumor.estimated_price].filter(Boolean).join(" · ")}
             </p>
+            </div>
           </div>
           <Badge variant={rumor.status === "active" ? "accent" : "primary"}>
             {formatTransferStatus(rumor.status)}

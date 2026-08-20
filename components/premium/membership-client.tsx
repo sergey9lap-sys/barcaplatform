@@ -20,6 +20,6 @@ export function MembershipClient() {
       <div className="space-y-2">{tier.features.map((feature) => <div key={feature} className="flex gap-2 text-sm text-blue-100/80"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />{feature}</div>)}</div>
       <Button className="w-full" variant={tier.id === "socio" ? "default" : "outline"} onClick={() => activate(tier.id)}>{active === tier.id ? "Активна в тестовом режиме" : "Включить для теста"}</Button>
     </CardContent></Card>)}</div>
-    <div className="flex items-start gap-3 rounded-2xl border border-amber-300/15 bg-amber-300/[0.05] p-4"><Badge variant="accent">Test mode</Badge><p className="ui-note text-sm">Тариф сохраняется в аккаунте через Supabase, а при недоступной базе — резервно в этом браузере. Деньги не списываются. Все игровые механики и XP остаются бесплатными.</p></div>
+    <div className="flex items-start gap-3 rounded-2xl border border-amber-300/15 bg-amber-300/[0.05] p-4"><Badge variant="accent">Тестовый режим</Badge><p className="ui-note text-sm">Тариф сохраняется в аккаунте через Supabase, а при недоступной базе — резервно в этом браузере. Деньги не списываются. Все игровые механики и опыт остаются бесплатными.</p></div>
   </div>;
 }

@@ -44,7 +44,7 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
-      <CommunityProfileCard profile={profile} />
+      <CommunityProfileCard profile={profile} userId={user?.id ?? null} />
 
       <FootballIntelligenceProfile />
 

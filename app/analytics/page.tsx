@@ -9,7 +9,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="hero-panel border-0" style={createPhotoPanelStyle(SECTION_BACKGROUNDS.homeLeague, { position: "center 45%" })}>
+      <Card className="hero-panel border-0" style={createPhotoPanelStyle(SECTION_BACKGROUNDS.homeLeague, { position: "center 18%" })}>
         <CardContent className="p-5">
           <p className="meta-label text-xs">Аналитика</p>
           <h2 className="mt-2 text-2xl font-semibold">Совместимость с Барсой, подход под тренера и детальные профили игроков</h2>

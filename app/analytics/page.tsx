@@ -1,11 +1,12 @@
 import { AnalyticsHubClient } from "@/components/analytics/analytics-hub-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { SECTION_BACKGROUNDS, createPhotoPanelStyle } from "@/lib/backgrounds";
-import { mockAnalyticsPlayers } from "@/lib/mocks/analytics";
+import { getAnalyticsPlayers } from "@/lib/data";
 import { isPremiumFeatureOpen } from "@/lib/premium/features";
 
-export default function AnalyticsPage() {
+export default async function AnalyticsPage() {
   const analyticsOpen = isPremiumFeatureOpen("advancedAnalytics");
+  const players = await getAnalyticsPlayers();
 
   return (
     <div className="space-y-6">
@@ -19,7 +20,7 @@ export default function AnalyticsPage() {
         </CardContent>
       </Card>
 
-      {analyticsOpen ? <AnalyticsHubClient players={mockAnalyticsPlayers} /> : null}
+      {analyticsOpen ? <AnalyticsHubClient players={players} /> : null}
     </div>
   );
 }

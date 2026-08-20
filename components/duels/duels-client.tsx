@@ -190,7 +190,7 @@ export function DuelsClient({
                       : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-white"
                   }`}
                 >
-                  <p className="text-sm font-semibold">{match.home_team} vs {match.away_team}</p>
+                  <p className="text-sm font-semibold">{match.home_team} — {match.away_team}</p>
                   <p className="mt-1 text-xs text-muted-foreground">{match.competition}</p>
                 </button>
               ))}
@@ -255,7 +255,7 @@ export function DuelsClient({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="meta-label text-xs">Дуэль</p>
-                    <CardTitle className="mt-2 text-xl">{match.home_team} vs {match.away_team}</CardTitle>
+                    <CardTitle className="mt-2 text-xl">{match.home_team} — {match.away_team}</CardTitle>
                   </div>
                   <Badge variant={match.status === "finished" ? "primary" : "accent"}>
                     {match.status === "finished" ? "Матч завершён" : "Ожидает матч"}

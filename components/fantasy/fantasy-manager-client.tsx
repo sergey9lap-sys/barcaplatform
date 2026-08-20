@@ -18,6 +18,7 @@ export function FantasyManagerClient({ match, players }: { match: Match; players
   const [selected, setSelected] = useState<string[]>([]);
   const [captain, setCaptain] = useState("");
   const [saved, setSaved] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const locked = new Date() >= new Date(match.kickoff_at);
 
   useEffect(() => {
@@ -43,8 +44,8 @@ export function FantasyManagerClient({ match, players }: { match: Match; players
 
   async function save() {
     if (!complete || locked) return;
-    await saveFantasyTeam(match.id, { selected, captain, budgetSpent: spent, savedAt: new Date().toISOString() }, match.kickoff_at);
-    setSaved(true);
+    const result = await saveFantasyTeam(match.id, { selected, captain, budgetSpent: spent, savedAt: new Date().toISOString() }, match.kickoff_at);
+    setSaved(true); setMessage(result.persisted ? "Состав сохранён в вашем аккаунте." : "Состав сохранён только на этом устройстве. Войдите, чтобы синхронизировать его.");
   }
 
   return <div className="space-y-5">
@@ -54,15 +55,13 @@ export function FantasyManagerClient({ match, players }: { match: Match; players
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{squad.map((player) => {
         const active = selected.includes(player.id); const avatar = getPlayerAvatarPath(player.player_name); const unavailable = !active && (selected.length >= 5 || spent + priceFor(player) > BUDGET);
         return <div key={player.id} className={`rounded-2xl border p-3 transition-all duration-200 ${active ? "border-rose-400/45 bg-gradient-to-br from-blue-600/20 to-rose-600/15" : "border-white/10 bg-white/[0.025]"} ${unavailable ? "opacity-45" : "hover:-translate-y-0.5 hover:border-blue-300/30"}`}>
-          <button type="button" disabled={locked || unavailable} onClick={() => toggle(player)} className="flex w-full items-center gap-3 text-left"><div className="h-12 w-12 shrink-0 rounded-full bg-white/90 bg-contain bg-bottom bg-no-repeat" style={avatar ? { backgroundImage: `url(${avatar})` } : undefined}>{avatar ? null : <span className="grid h-full place-items-center text-sm font-bold text-[#071229]">{player.player_name.slice(0, 1)}</span>}</div><div className="min-w-0 flex-1"><p className="ui-value truncate text-sm font-semibold">{player.player_name}</p><p className="ui-note mt-1 text-xs">{player.position} · {priceFor(player)} cr</p></div><span className={`h-5 w-5 rounded-full border ${active ? "border-rose-300 bg-rose-500 shadow-glow" : "border-white/25"}`} /></button>
+          <button type="button" disabled={locked || unavailable} onClick={() => toggle(player)} className="flex min-h-12 w-full items-center gap-3 text-left"><div className="h-12 w-12 shrink-0 rounded-full bg-white/90 bg-contain bg-bottom bg-no-repeat" style={avatar ? { backgroundImage: `url(${avatar})` } : undefined}>{avatar ? null : <span className="grid h-full place-items-center text-sm font-bold text-[#071229]">{player.player_name.slice(0, 1)}</span>}</div><div className="min-w-0 flex-1"><p className="ui-value truncate text-sm font-semibold">{player.player_name}</p><p className="ui-note mt-1 text-xs">{player.position} · {priceFor(player)} ед.</p></div><span className={`h-5 w-5 rounded-full border ${active ? "border-rose-300 bg-rose-500 shadow-glow" : "border-white/25"}`} /></button>
           {active ? <button type="button" onClick={() => { setCaptain(player.id); setSaved(false); }} className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs transition-colors ${captain === player.id ? "border-amber-300/40 bg-amber-400/15 text-amber-100" : "border-white/10 bg-white/[0.03] text-blue-100/65"}`}><Crown className="h-3.5 w-3.5" />{captain === player.id ? "Капитан x2" : "Назначить капитаном"}</button> : null}
         </div>;
       })}</div>
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/15 p-4"><div className="flex items-center gap-2 text-sm ui-note">{locked ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}{complete ? "Команда готова к синхронизации" : "Выберите 5 игроков и капитана"}</div><Button disabled={!complete || locked} onClick={() => void save()}><Save className="mr-2 h-4 w-4" />{saved ? "Состав сохранён" : "Сохранить состав"}</Button></div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/15 p-4"><div><div className="flex items-center gap-2 text-sm ui-note">{locked ? <Lock className="h-4 w-4" /> : <Users className="h-4 w-4" />}{complete ? "Команда готова к синхронизации" : "Выберите 5 игроков и капитана"}</div>{message ? <p className="mt-2 text-xs text-amber-100" role="status">{message}</p> : null}</div><Button disabled={!complete || locked} onClick={() => void save()}><Save className="mr-2 h-4 w-4" />{saved ? "Состав сохранён" : "Сохранить состав"}</Button></div>
     </CardContent></Card>
-    <div className="grid gap-4 lg:grid-cols-3"><League title="Недельная лига" place="#14" players="1 284" /><League title="Месячная лига" place="#39" players="4 610" /><League title="Приватная лига" place="Создать" players="для друзей" /></div>
   </div>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) { return <div className="ui-data-card"><p className="meta-label text-[10px]">{label}</p><p className="ui-value mt-2 text-lg font-semibold">{value}</p></div>; }
-function League({ title, place, players }: { title: string; place: string; players: string }) { return <Card className="soft-panel"><CardContent className="p-5"><p className="meta-label text-xs">{title}</p><div className="mt-3 flex items-end justify-between"><p className="text-2xl font-semibold">{place}</p><p className="ui-note text-xs">{players}</p></div></CardContent></Card>; }

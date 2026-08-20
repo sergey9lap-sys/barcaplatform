@@ -2,9 +2,6 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, ShieldCheck, UsersRound } from "lucide-react";
 
 import { NextMatchCountdown } from "@/components/home/next-match-countdown";
-import { CommunityConsensus } from "@/components/community/community-consensus";
-import { DailyChallengeCard } from "@/components/community/daily-challenge-card";
-import { StreamPicks } from "@/components/community/stream-picks";
 import { LeaderboardClient } from "@/components/leaderboard/leaderboard-client";
 import { HomeStatusCard } from "@/components/home/home-status-card";
 import { MatchCard } from "@/components/matches/match-card";
@@ -18,26 +15,24 @@ import {
   getAllMatches,
   getAllPlayerRankingsForUser,
   getAllPredictionsForUser,
+  getAnalyticsPlayers,
   getCurrentProfile,
   getCurrentUser,
   getLeaderboard,
+  getLaMasiaPlayers,
   getSeasonPlayerStats,
   getTransferRumors,
   getTransferPredictionsForUser,
   getUpcomingMatches,
 } from "@/lib/data";
 import { getSupabaseEnv } from "@/lib/env";
-import { mockAnalyticsPlayers } from "@/lib/mocks/analytics";
-import { mockDailyChallenges } from "@/lib/mocks/community";
-import { mockCommunityUsers } from "@/lib/mocks/community-users";
-import { mockLaMasiaPlayers } from "@/lib/mocks/la-masia";
 import { mockLoanPlayers } from "@/lib/mocks/loan-players";
 import { formatMatchDate } from "@/lib/format";
 import { SectionArtwork, type SectionArtworkId } from "@/components/visuals/section-artwork";
 
 export default async function HomePage() {
   const { configured } = getSupabaseEnv();
-  const [profile, user, matches, allMatches, leaderboard, rumors, seasonPlayerStats] = await Promise.all([
+  const [profile, user, matches, allMatches, leaderboard, rumors, seasonPlayerStats, academyPlayers, analyticsPlayers] = await Promise.all([
     getCurrentProfile(),
     getCurrentUser(),
     getUpcomingMatches(3),
@@ -45,6 +40,8 @@ export default async function HomePage() {
     getLeaderboard(5),
     getTransferRumors(),
     getSeasonPlayerStats(),
+    getLaMasiaPlayers(),
+    getAnalyticsPlayers(),
   ]);
   const [predictions, lineups, transfers, playerRankings] = await Promise.all([
     getAllPredictionsForUser(user?.id),
@@ -125,7 +122,7 @@ export default async function HomePage() {
             <QuickAction href="/challenges" label="Пройти челлендж" artwork="challenges" />
             <QuickAction href="/transfers" label="Оценить трансфер" artwork="transfers" />
             <QuickAction href="/la-masia" label="Следить за талантом" artwork="academy" />
-            <QuickAction href="/fantasy" label="Собрать Fantasy" artwork="fantasy" />
+            <QuickAction href="/fantasy" label="Собрать фэнтези" artwork="fantasy" />
             <QuickAction href="/vip" label="Войти в Socio 1899" artwork="vip" />
           </div>
         </div>
@@ -138,28 +135,7 @@ export default async function HomePage() {
             Все челленджи
           </Link>
         </div>
-        <DailyChallengeCard challenge={mockDailyChallenges[0]} compact />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="section-title">Пульс сообщества</h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          <CommunityConsensus
-            options={[
-              { label: "Брать Лукеба", votes: 58 },
-              { label: "Следить", votes: 21 },
-              { label: "Слишком рискованно", votes: 12 },
-              { label: "Не покупать", votes: 9 },
-            ]}
-          />
-          <HomeFeatureCard
-            label="Спор дня о трансферах"
-            title="Кастелло Лукеба: брать сейчас или ждать?"
-            text="Сообщество спорит о цене, роли слева и прессинг-совместимости."
-            href="/transfers"
-            cta="К обсуждению"
-          />
-        </div>
+        <HomeFeatureCard label="Ежедневная серия" title="Новый челлендж уже открыт" text="Заберите ежедневный бонус, ответьте на вопрос или выполните задание ближайшего матча." href="/challenges" cta="Открыть челленджи" artwork="challenges" />
       </section>
 
       <section className="space-y-3">
@@ -171,63 +147,6 @@ export default async function HomePage() {
         </div>
         <div className="space-y-3">
           {matches.length ? matches.map((match) => <MatchCard key={match.id} match={match} />) : null}
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title">Лучшие аналитики</h2>
-          <Link className="section-link" href="/leaderboards">
-            Рейтинги
-          </Link>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          {[...mockCommunityUsers]
-            .sort((a, b) => b.analyst_reputation - a.analyst_reputation)
-            .slice(0, 3)
-            .map((user) => (
-              <Card key={user.id} className="soft-panel">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className="club-avatar h-11 w-11 rounded-2xl text-xs">{user.avatar}</div>
-                    <div>
-                      <p className="ui-value text-sm font-semibold">{user.username}</p>
-                      <p className="ui-note text-xs">{user.analyst_reputation} очков репутации аналитика</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-        </div>
-      </section>
-
-      <StreamPicks compact />
-
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="section-title">Топ сообщества</h2>
-          <Link className="section-link" href="/leaderboards">
-            Полный рейтинг
-          </Link>
-        </div>
-        <div className="space-y-3">
-          {[...mockCommunityUsers]
-            .sort((a, b) => b.points - a.points)
-            .slice(0, 3)
-            .map((user, index) => (
-              <Card key={user.id} className="soft-panel">
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-3">
-                    <Badge variant={index === 0 ? "accent" : "default"}>#{index + 1}</Badge>
-                    <div>
-                      <p className="ui-value text-sm font-semibold">{user.username}</p>
-                      <p className="ui-note text-xs">{user.badges.slice(0, 2).join(" · ")}</p>
-                    </div>
-                  </div>
-                  <p className="ui-value text-sm font-semibold">{user.points}</p>
-                </CardContent>
-              </Card>
-            ))}
         </div>
       </section>
 
@@ -280,15 +199,15 @@ export default async function HomePage() {
           />
           <HomeFeatureCard
             label="Наблюдение за Ла Масией"
-            title={`${mockLaMasiaPlayers.length} молодых игроков`}
-            text="Главные таланты, Barça Atlètic, U19, кандидаты на сборы и личный watchlist."
+            title={`${academyPlayers.length} молодых игроков`}
+            text="Главные таланты, Барса Атлетик, U19, кандидаты на сборы и личный список наблюдения."
             href="/la-masia"
             cta="Смотреть таланты"
             artwork="academy"
           />
           <HomeFeatureCard
             label="Аналитика игроков"
-            title={`${mockAnalyticsPlayers.length} профиля`}
+            title={`${analyticsPlayers.length} профиля`}
             text="Техника, прессинг, игра под давлением, ментальность и совместимость с тренером."
             href="/analytics"
             cta="Открыть карточки"

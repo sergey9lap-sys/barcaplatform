@@ -23,8 +23,12 @@ const metricLabels = [
 export function AnalyticsHubClient({ players }: { players: AnalyticsPlayerRecord[] }) {
   const [selectedId, setSelectedId] = useState(players[0]?.id ?? "");
   const selected = players.find((player) => player.id === selectedId) ?? players[0];
-  const barcaFitIndex = Math.round(players.reduce((sum, player) => sum + player.barca_compatibility, 0) / players.length);
-  const coachFitIndex = Math.round(players.reduce((sum, player) => sum + player.coach_compatibility, 0) / players.length);
+  const barcaFitIndex = players.length ? Math.round(players.reduce((sum, player) => sum + player.barca_compatibility, 0) / players.length) : 0;
+  const coachFitIndex = players.length ? Math.round(players.reduce((sum, player) => sum + player.coach_compatibility, 0) / players.length) : 0;
+
+  if (!players.length) {
+    return <Card className="soft-panel"><CardContent className="p-6"><h2 className="text-xl font-semibold">Аналитические профили готовятся</h2><p className="ui-note mt-2 text-sm">После применения миграции 0021 здесь появятся живые карточки игроков, которыми можно управлять через Supabase.</p></CardContent></Card>;
+  }
 
   return (
     <div className="space-y-5">
@@ -36,7 +40,7 @@ export function AnalyticsHubClient({ players }: { players: AnalyticsPlayerRecord
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="section-title">Игроки и цели</h2>
-          <Badge variant="accent">Все функции открыты</Badge>
+          <Badge variant="accent">Живые данные</Badge>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           {players.map((player) => (

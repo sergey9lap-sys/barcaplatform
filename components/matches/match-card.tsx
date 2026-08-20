@@ -21,7 +21,7 @@ export function MatchCard({ match }: MatchCardProps) {
           <div>
             <p className="meta-label text-xs">{match.competition}</p>
             <h3 className="mt-2 text-lg font-semibold">
-              {match.home_team} vs {match.away_team}
+              {match.home_team} — {match.away_team}
             </h3>
             <p className="mt-1 text-sm text-blue-100/70">{match.venue}</p>
           </div>

@@ -48,7 +48,7 @@ export default async function MatchDetailPage({ params }: MatchDetailPageProps) 
             <div>
               <p className="meta-label text-xs">{match.competition}</p>
               <h2 className="mt-2 text-2xl font-semibold">
-                {match.home_team} vs {match.away_team}
+                {match.home_team} — {match.away_team}
               </h2>
             </div>
             <Badge variant={match.status === "finished" ? "primary" : "accent"}>

@@ -68,7 +68,7 @@ export function NextMatchCountdown({ matches }: NextMatchCountdownProps) {
       <div className="space-y-5 p-5">
         <div className="space-y-2">
           <h2 className="ui-value text-2xl font-semibold">
-            {nextMatch.home_team} vs {nextMatch.away_team}
+            {nextMatch.home_team} — {nextMatch.away_team}
           </h2>
           <p className="ui-note text-sm">{nextMatch.competition}</p>
           <p className="ui-note text-sm">{formatMatchDate(nextMatch.kickoff_at)}</p>

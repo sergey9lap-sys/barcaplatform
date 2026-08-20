@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { FanArtwork } from "@/components/visuals/vip-artwork";
 import { getRankTitle } from "@/lib/community/gamification";
-import { defaultMasteryTracks, getMasteryLevel, getOverallXp } from "@/lib/community/mastery";
+import { defaultMasteryTracks, getAccountLevel, getMasteryLevel, getOverallXp } from "@/lib/community/mastery";
 import { loadMasteryTracks } from "@/lib/community/mastery-storage";
 import { getAccountLevelArtwork } from "@/lib/profile/artwork";
 
@@ -15,7 +15,7 @@ export function FootballIntelligenceProfile() {
   const [tracks, setTracks] = useState(defaultMasteryTracks);
   useEffect(() => { void loadMasteryTracks().then(setTracks); }, []);
   const totalXp = useMemo(() => getOverallXp(tracks), [tracks]);
-  const accountLevel = Math.floor(totalXp / 750) + 1;
+  const accountLevel = getAccountLevel(totalXp);
   const accountRank = getRankTitle(accountLevel);
   const nextLevelProgress = Math.round(((totalXp % 750) / 750) * 100);
 

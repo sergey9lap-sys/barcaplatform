@@ -10,9 +10,9 @@ The platform is a premium, dark blue-and-garnet fan game for FC Barcelona suppor
 - The account level aggregates specialist tracks: Results, Exact Score, Tactics, Transfers, Fantasy, Duels, Knowledge, Analyst and Scout.
 - Premium is identity, depth, convenience and community—not pay-to-win.
 
-## Local release mode
+## Closed testing mode
 
-Supabase and real payments are intentionally disabled for this iteration. Fantasy teams, memberships, VIP votes and digital purchases persist in localStorage and are shaped for later migration.
+Supabase powers accounts, profiles, predictions, community activity, fantasy leagues and progression during closed testing. Guest-safe local fallback remains available where it helps people explore the interface. Socio memberships and digital purchases are explicitly marked as test mode; real payments are deferred until the release and security audit.
 
 ## Memberships
 

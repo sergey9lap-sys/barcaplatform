@@ -16,6 +16,7 @@ import { buildSeasonPlayerStats } from "@/lib/player-rankings/stats";
 import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type {
+  AnalyticsPlayerRecord,
   DuelRecord,
   ChallengeRecord,
   LeaderboardEntry,
@@ -31,6 +32,7 @@ import type {
   PlayerRankingRecord,
   PlayerCatalogItem,
   Profile,
+  PublicLeaderboardEntry,
   SeasonPlayerStat,
   TransferIdeaRecord,
   TransferPredictionRecord,
@@ -157,6 +159,28 @@ export async function getCurrentProfile() {
     is_admin: false,
     created_at: new Date().toISOString(),
   } satisfies Profile;
+}
+
+export async function getPublicLeaderboard() {
+  noStore();
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) return [] as PublicLeaderboardEntry[];
+  const { data, error } = await supabase.rpc("get_public_leaderboard");
+  if (error || !data) return [] as PublicLeaderboardEntry[];
+  return data as PublicLeaderboardEntry[];
+}
+
+export async function getAnalyticsPlayers() {
+  noStore();
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) return [] as AnalyticsPlayerRecord[];
+  const { data, error } = await supabase
+    .from("analytics_players")
+    .select("id,name,role,position,source_label,technique,pressure_play,pressing,positional_discipline,intelligence,mentality,coach_compatibility,barca_compatibility,conclusion")
+    .eq("is_active", true)
+    .order("barca_compatibility", { ascending: false });
+  if (error || !data) return [] as AnalyticsPlayerRecord[];
+  return data as AnalyticsPlayerRecord[];
 }
 
 export async function getUpcomingMatches(limit?: number) {

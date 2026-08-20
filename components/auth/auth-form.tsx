@@ -11,7 +11,7 @@ import { getSupabaseEnv } from "@/lib/env";
 import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
 import { createSupabaseClient } from "@/lib/supabase/client";
 
-type AuthMode = "sign-in" | "sign-up";
+type AuthMode = "sign-in" | "sign-up" | "reset" | "recovery";
 
 export function AuthForm() {
   const [mode, setMode] = useState<AuthMode>("sign-in");
@@ -27,11 +27,11 @@ export function AuthForm() {
 
   useEffect(() => {
     const requestedMode = searchParams?.get("mode");
-    setMode(requestedMode === "sign-up" ? "sign-up" : "sign-in");
+    setMode(requestedMode === "sign-up" || requestedMode === "reset" || requestedMode === "recovery" ? requestedMode : "sign-in");
   }, [searchParams]);
 
   const title = useMemo(
-    () => (mode === "sign-in" ? "С возвращением в игру" : "Создайте аккаунт болельщика"),
+    () => mode === "sign-in" ? "С возвращением в игру" : mode === "sign-up" ? "Создайте аккаунт болельщика" : mode === "reset" ? "Восстановление доступа" : "Новый пароль",
     [mode],
   );
 
@@ -48,8 +48,22 @@ export function AuthForm() {
 
     setSubmitting(true);
 
+    if (mode === "reset") {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth?mode=recovery` });
+      setSubmitting(false);
+      if (resetError) setError(resetError.message); else setSuccess("Письмо для восстановления отправлено. Проверьте почту.");
+      return;
+    }
+
+    if (mode === "recovery") {
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      setSubmitting(false);
+      if (updateError) setError(updateError.message); else { setSuccess("Пароль обновлён. Теперь можно войти."); setMode("sign-in"); }
+      return;
+    }
+
     if (mode === "sign-up") {
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -62,10 +76,13 @@ export function AuthForm() {
       if (signUpError) {
         setError(signUpError.message);
       } else {
-        await ensureProfileExists(supabase);
-        setSuccess("Аккаунт создан. Теперь можно делать прогнозы.");
-        router.replace("/");
-        router.refresh();
+        if (signUpData.session) {
+          await ensureProfileExists(supabase);
+          router.replace("/");
+          router.refresh();
+        } else {
+          setSuccess("Аккаунт создан. Подтвердите почту по ссылке из письма, затем войдите.");
+        }
       }
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -124,7 +141,7 @@ export function AuthForm() {
             </div>
           ) : null}
 
-          <div className="space-y-2">
+          {mode !== "recovery" ? <div className="space-y-2">
             <Label htmlFor="email">Почта</Label>
             <Input
               id="email"
@@ -134,20 +151,20 @@ export function AuthForm() {
               placeholder="barca@fan.ru"
               required
             />
-          </div>
+          </div> : null}
 
-          <div className="space-y-2">
+          {mode !== "reset" ? <div className="space-y-2">
             <Label htmlFor="password">Пароль</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Минимум 6 символов"
-              minLength={6}
+              placeholder="Минимум 8 символов"
+              minLength={8}
               required
             />
-          </div>
+          </div> : null}
 
           {error ? <p className="text-sm text-rose-300">{error}</p> : null}
           {success ? <p className="text-sm text-blue-200">{success}</p> : null}
@@ -158,8 +175,10 @@ export function AuthForm() {
           ) : null}
 
           <Button className="w-full" disabled={submitting}>
-            {submitting ? "Сохраняем..." : mode === "sign-in" ? "Войти" : "Создать аккаунт"}
+            {submitting ? "Сохраняем..." : mode === "sign-in" ? "Войти" : mode === "sign-up" ? "Создать аккаунт" : mode === "reset" ? "Отправить письмо" : "Сохранить новый пароль"}
           </Button>
+          {mode === "sign-in" ? <button type="button" onClick={() => setMode("reset")} className="min-h-11 w-full text-sm font-semibold text-blue-100/75 underline underline-offset-4 hover:text-white">Не помню пароль</button> : null}
+          {mode === "reset" || mode === "recovery" ? <button type="button" onClick={() => setMode("sign-in")} className="min-h-11 w-full text-sm font-semibold text-blue-100/75 underline underline-offset-4 hover:text-white">Вернуться ко входу</button> : null}
         </form>
       </CardContent>
     </Card>

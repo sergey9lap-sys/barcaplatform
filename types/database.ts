@@ -17,6 +17,30 @@ export interface Profile {
   is_admin: boolean;
   created_at: string;
   avatar_url?: string | null;
+  favorite_player?: string;
+  favorite_era?: string;
+  favorite_coach?: string;
+  favorite_formation?: string;
+  short_bio?: string;
+  current_streak?: number;
+  longest_streak?: number;
+  last_active_date?: string | null;
+  badges?: string[];
+}
+
+export interface PublicLeaderboardEntry {
+  id: string;
+  display_name: string;
+  avatar_url: string | null;
+  total_points: number;
+  total_xp: number;
+  prediction_accuracy: number;
+  analyst_reputation: number;
+  scout_reputation: number;
+  transfer_reputation: number;
+  tactical_reputation: number;
+  la_masia_follows: number;
+  badges: string[];
 }
 
 export interface Match {
@@ -306,6 +330,23 @@ export interface NotificationRecord {
   createdAt: string;
   isRead: boolean;
   link: string;
+}
+
+export interface FantasyLeagueRecord {
+  id: string;
+  owner_id: string;
+  season_id: string;
+  title: string;
+  invite_code: string;
+  is_private: boolean;
+  created_at: string;
+}
+
+export interface FantasyStandingRecord {
+  user_id: string;
+  display_name: string;
+  avatar_url: string | null;
+  points: number;
 }
 
 export interface StreamPickRecord {

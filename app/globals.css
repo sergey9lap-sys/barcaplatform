@@ -170,7 +170,7 @@ label {
   }
 
   .section-link {
-    @apply text-sm transition-colors;
+    @apply inline-flex min-h-11 items-center text-sm transition-colors;
     color: rgba(211, 154, 173, 0.9);
     font-family: "Times New Roman", Times, serif;
     letter-spacing: -0.01em;
@@ -224,7 +224,8 @@ label {
   }
 
   .ui-tab {
-    @apply min-h-11 rounded-2xl px-3 py-2 text-sm transition-colors;
+    min-height: 44px;
+    @apply rounded-2xl px-3 py-2 text-sm transition-colors;
     transition:
       color 220ms ease,
       background 220ms ease,
@@ -660,7 +661,8 @@ label {
   }
 
   .nav-item {
-    @apply flex min-h-12 flex-col items-center justify-center gap-1 rounded-xl px-2 text-center text-[11px] font-semibold sm:text-xs;
+    min-height: 48px;
+    @apply flex flex-col items-center justify-center gap-1 rounded-xl px-2 text-center text-[11px] font-semibold sm:text-xs;
     transition:
       color 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),
       background-color 160ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)),

@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { CommunityProfileCard } from "@/components/profile/community-profile-card";
-import { RewardsProfileSection } from "@/components/profile/rewards-profile-section";
 import { ProfileInsightsClient } from "@/components/profile/profile-insights-client";
 import { FootballIntelligenceProfile } from "@/components/profile/football-intelligence-profile";
+import { ProfileSectionsClient } from "@/components/profile/profile-sections-client";
 import { SECTION_BACKGROUNDS, createPhotoPanelStyle } from "@/lib/backgrounds";
 import {
   getAllLineupPredictionsForUser,
@@ -25,6 +27,10 @@ export default async function ProfilePage() {
     getSeasonPlayerStats(),
   ]);
 
+  if (!user || !profile) {
+    return <div className="space-y-6"><Card className="hero-panel border-0" style={createPhotoPanelStyle(SECTION_BACKGROUNDS.profileHero, { position: "center 38%" })}><CardContent className="p-5"><h2 className="text-2xl font-semibold">Ваш футбольный профиль</h2><p className="mt-2 max-w-2xl text-sm text-blue-100/75">Войдите, чтобы увидеть настоящий уровень, навыки, награды и историю прогнозов.</p></CardContent></Card><Card className="soft-panel"><CardContent className="grid min-h-64 place-items-center p-6 text-center"><div><h2 className="text-xl font-semibold">Начните собирать свою репутацию</h2><p className="ui-note mt-2 max-w-md text-sm">Подтверждённые прогнозы и игровые действия будут формировать ваш уникальный профиль.</p><Button asChild className="mt-5"><Link href="/auth">Войти или зарегистрироваться</Link></Button></div></CardContent></Card></div>;
+  }
+
   const [predictions, lineups, transfers, playerRankings] = await Promise.all([
     getAllPredictionsForUser(user?.id),
     getAllLineupPredictionsForUser(user?.id),
@@ -44,13 +50,10 @@ export default async function ProfilePage() {
         </CardContent>
       </Card>
 
-      <CommunityProfileCard profile={profile} userId={user?.id ?? null} />
-
-      <FootballIntelligenceProfile />
-
-      <RewardsProfileSection />
-
-      <ProfileInsightsClient
+      <ProfileSectionsClient
+        overview={<CommunityProfileCard profile={profile} userId={user.id} />}
+        skills={<FootballIntelligenceProfile />}
+        activity={<ProfileInsightsClient
         matches={matches}
         profile={profile}
         predictions={predictions}
@@ -59,6 +62,7 @@ export default async function ProfilePage() {
         playerRankings={playerRankings}
         seasonPlayerStats={seasonPlayerStats}
         backendEnabled={configured}
+        />}
       />
     </div>
   );

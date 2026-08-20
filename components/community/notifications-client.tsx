@@ -6,12 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  getStoredNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  NOTIFICATIONS_UPDATED_EVENT,
-} from "@/lib/community/notifications-storage";
+import { loadNotifications, readAllNotifications, readNotification } from "@/lib/community/notifications-live";
 import type { NotificationRecord } from "@/types/database";
 
 export function NotificationsClient() {
@@ -19,14 +14,7 @@ export function NotificationsClient() {
   const unread = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
 
   useEffect(() => {
-    setNotifications(getStoredNotifications());
-
-    function handleNotificationsUpdated(event: Event) {
-      setNotifications((event as CustomEvent<NotificationRecord[]>).detail ?? getStoredNotifications());
-    }
-
-    window.addEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated);
-    return () => window.removeEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated);
+    void loadNotifications().then(setNotifications);
   }, []);
 
   return (
@@ -42,7 +30,7 @@ export function NotificationsClient() {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => setNotifications(markAllNotificationsRead())}
+              onClick={() => void readAllNotifications().then(setNotifications)}
               disabled={!unread}
             >
               Прочитать всё
@@ -51,11 +39,11 @@ export function NotificationsClient() {
         </div>
 
         <div className="space-y-3">
-          {notifications.map((notification) => (
+          {notifications.length ? notifications.map((notification) => (
             <Link
               key={notification.id}
               href={notification.link}
-              onClick={() => setNotifications(markNotificationRead(notification.id))}
+              onClick={() => void readNotification(notification.id).then(setNotifications)}
               className={notification.isRead ? "block rounded-2xl border border-white/10 bg-white/[0.03] p-4 opacity-70" : "block rounded-2xl border border-accent/25 bg-accent/10 p-4 shadow-glow"}
             >
               <div className="flex items-start justify-between gap-3">
@@ -67,7 +55,7 @@ export function NotificationsClient() {
                 {!notification.isRead ? <Badge variant="primary">новое</Badge> : null}
               </div>
             </Link>
-          ))}
+          )) : <div className="rounded-2xl border border-dashed border-white/15 p-8 text-center"><p className="ui-value font-semibold">Пока всё спокойно</p><p className="ui-note mt-2 text-sm">Здесь появятся результаты прогнозов, ответы, бейджи и новые челленджи.</p></div>}
         </div>
       </CardContent>
     </Card>

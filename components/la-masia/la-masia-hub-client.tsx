@@ -7,10 +7,11 @@ import { Bookmark, Check, Eye, ShieldCheck, Sparkles, Users } from "lucide-react
 import { CommunityConsensus } from "@/components/community/community-consensus";
 import { ExplainYourTake } from "@/components/community/explain-your-take";
 import { Badge } from "@/components/ui/badge";
+import { loadAcademyWatchlist, saveAcademyVerdict, toggleAcademyWatch, type AcademyVerdict } from "@/lib/la-masia/storage";
 import type { LaMasiaPlayerRecord, LaMasiaStatus, LaMasiaTeamLevel } from "@/types/database";
 
 type TabId = "talents" | "atletic" | "u19" | "preseason" | "watchlist";
-type Verdict = "Готов к основе" | "Взять на сборы" | "Нужна аренда" | "Пока рано";
+type Verdict = AcademyVerdict;
 
 const tabs: { id: TabId; label: string }[] = [
   { id: "talents", label: "Все таланты" },
@@ -27,12 +28,10 @@ export function LaMasiaHubClient({ players }: { players: LaMasiaPlayerRecord[] }
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [selectedId, setSelectedId] = useState(players[0]?.id ?? "");
   const [playerVerdicts, setPlayerVerdicts] = useState<Record<string, Verdict>>({});
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    const savedWatchlist = window.localStorage.getItem("barca-la-masia-watchlist");
-    const savedVerdicts = window.localStorage.getItem("barca-la-masia-verdicts");
-    setWatchlist(savedWatchlist ? JSON.parse(savedWatchlist) : []);
-    setPlayerVerdicts(savedVerdicts ? JSON.parse(savedVerdicts) : {});
+    void loadAcademyWatchlist().then((result) => { setAuthenticated(result.authenticated); setWatchlist(result.watchlist); setPlayerVerdicts(result.verdicts); });
   }, []);
 
   const visiblePlayers = useMemo(() => {
@@ -51,7 +50,7 @@ export function LaMasiaHubClient({ players }: { players: LaMasiaPlayerRecord[] }
   function toggleWatch(playerId: string) {
     setWatchlist((current) => {
       const next = current.includes(playerId) ? current.filter((id) => id !== playerId) : [...current, playerId];
-      window.localStorage.setItem("barca-la-masia-watchlist", JSON.stringify(next));
+      void toggleAcademyWatch(playerId, current.includes(playerId));
       return next;
     });
   }
@@ -59,7 +58,7 @@ export function LaMasiaHubClient({ players }: { players: LaMasiaPlayerRecord[] }
   function saveVerdict(playerId: string, verdict: Verdict) {
     setPlayerVerdicts((current) => {
       const next = { ...current, [playerId]: verdict };
-      window.localStorage.setItem("barca-la-masia-verdicts", JSON.stringify(next));
+      void saveAcademyVerdict(playerId, verdict);
       return next;
     });
   }
@@ -71,6 +70,7 @@ export function LaMasiaHubClient({ players }: { players: LaMasiaPlayerRecord[] }
         <SummaryItem icon={ShieldCheck} value={firstTeamCandidates} label="ближе всего к основе" />
         <SummaryItem icon={Sparkles} value={preseasonCandidates} label="кандидатов на сборы" />
       </section>
+      {!authenticated ? <div className="rounded-2xl border border-blue-300/15 bg-blue-400/[0.06] p-4 text-sm text-blue-100/75">Войдите в аккаунт, чтобы список наблюдения и ваши решения сохранялись на всех устройствах.</div> : null}
 
       <div className="no-scrollbar overflow-x-auto pb-1">
         <div className="flex min-w-max gap-2" role="tablist" aria-label="Фильтр игроков Ла Масии">
@@ -173,14 +173,14 @@ function TalentCard({
       </button>
 
       <div className="flex gap-2 border-t border-white/10 p-3">
-        <button type="button" onClick={onSelect} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/[0.055] px-3 py-2.5 text-sm font-semibold text-blue-50 transition hover:bg-white/[0.09]">
+        <button type="button" onClick={onSelect} className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-white/[0.055] px-3 py-2.5 text-sm font-semibold text-blue-50 transition hover:bg-white/[0.09]">
           <Eye className="h-4 w-4" /> Открыть досье
         </button>
         <button
           type="button"
           onClick={onToggleWatch}
           aria-label={watched ? `Убрать ${player.name} из списка` : `Следить за ${player.name}`}
-          className={`rounded-xl px-3 transition ${watched ? "bg-blue-500 text-white" : "bg-white/[0.055] text-blue-100 hover:bg-white/[0.09]"}`}
+          className={`min-h-[44px] min-w-[44px] rounded-xl px-3 transition ${watched ? "bg-blue-500 text-white" : "bg-white/[0.055] text-blue-100 hover:bg-white/[0.09]"}`}
         >
           <Bookmark className={`h-4 w-4 ${watched ? "fill-current" : ""}`} />
         </button>

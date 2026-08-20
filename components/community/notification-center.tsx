@@ -5,11 +5,7 @@ import { Bell } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  getStoredNotifications,
-  markNotificationRead,
-  NOTIFICATIONS_UPDATED_EVENT,
-} from "@/lib/community/notifications-storage";
+import { loadNotifications, readNotification } from "@/lib/community/notifications-live";
 import type { NotificationRecord } from "@/types/database";
 
 export function NotificationCenter() {
@@ -18,14 +14,7 @@ export function NotificationCenter() {
   const unread = useMemo(() => notifications.filter((item) => !item.isRead).length, [notifications]);
 
   useEffect(() => {
-    setNotifications(getStoredNotifications());
-
-    function handleNotificationsUpdated(event: Event) {
-      setNotifications((event as CustomEvent<NotificationRecord[]>).detail ?? getStoredNotifications());
-    }
-
-    window.addEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated);
-    return () => window.removeEventListener(NOTIFICATIONS_UPDATED_EVENT, handleNotificationsUpdated);
+    void loadNotifications().then(setNotifications);
   }, []);
 
   return (
@@ -33,7 +22,7 @@ export function NotificationCenter() {
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className="relative rounded-2xl border border-white/10 bg-white/[0.04] p-2 text-blue-100/80 transition-colors hover:text-[#f1d1db]"
+        className="relative grid h-[44px] w-[44px] place-items-center rounded-2xl border border-white/10 bg-white/[0.04] text-blue-100/80 transition-colors hover:text-[#f1d1db]"
         aria-label="Уведомления"
       >
         <Bell className="h-4 w-4" />
@@ -46,12 +35,12 @@ export function NotificationCenter() {
             <Badge variant="accent">{unread} новых</Badge>
           </div>
           <div className="space-y-2">
-            {notifications.map((notification) => (
+            {notifications.length ? notifications.slice(0, 4).map((notification) => (
               <Link
                 key={notification.id}
                 href={notification.link}
                 onClick={() => {
-                  setNotifications(markNotificationRead(notification.id));
+                  void readNotification(notification.id).then(setNotifications);
                   setOpen(false);
                 }}
                 className="block rounded-2xl border border-white/10 bg-white/[0.03] p-3"
@@ -60,7 +49,7 @@ export function NotificationCenter() {
                 <p className="ui-value mt-1 text-sm font-semibold">{notification.title}</p>
                 <p className="ui-note mt-1 text-xs">{notification.description}</p>
               </Link>
-            ))}
+            )) : <p className="ui-note rounded-2xl border border-dashed border-white/10 p-4 text-center text-xs">Новых уведомлений нет.</p>}
           </div>
         </div>
       ) : null}

@@ -234,6 +234,68 @@ export interface DailyChallengeRecord {
   expiresAt: string;
 }
 
+export type ChallengeDayMode = "ordinary" | "matchday" | "any";
+export type ChallengePhase = "daily" | "pre_match" | "post_match";
+export type ChallengeCadence = "daily" | "weekly" | "monthly";
+export type ChallengeResponseType = "single_choice" | "multiple_choice" | "text" | "scale" | "score" | "action";
+export type ChallengeVerificationType = "participation" | "correct_answer" | "match_result" | "manual";
+export type ChallengeStatus = "draft" | "published" | "archived";
+export type ChallengeSubmissionStatus = "submitted" | "pending" | "verified" | "rejected";
+
+export interface ChallengeOptionRecord {
+  id: string;
+  label: string;
+  votes?: number;
+}
+
+export interface ChallengeRecord {
+  id: string;
+  title: string;
+  description: string;
+  template_key: string;
+  day_mode: ChallengeDayMode;
+  phase: ChallengePhase;
+  cadence: ChallengeCadence;
+  response_type: ChallengeResponseType;
+  verification_type: ChallengeVerificationType;
+  skill_key: string | null;
+  match_id: string | null;
+  options: ChallengeOptionRecord[];
+  correct_answer: unknown;
+  linked_route: string | null;
+  reward_coins: number;
+  reward_xp: number;
+  target_count: number;
+  opens_at: string | null;
+  closes_at: string | null;
+  status: ChallengeStatus;
+  featured: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChallengeSubmissionRecord {
+  id: string;
+  challenge_id: string;
+  user_id: string;
+  answer: unknown;
+  status: ChallengeSubmissionStatus;
+  was_correct: boolean | null;
+  coins_awarded: number;
+  xp_awarded: number;
+  submitted_at: string;
+  reviewed_at: string | null;
+}
+
+export interface ChallengeWalletRecord {
+  user_id: string;
+  coins: number;
+  current_streak: number;
+  longest_streak: number;
+  last_claimed_date: string | null;
+  updated_at: string;
+}
+
 export interface NotificationRecord {
   id: string;
   type: "reply" | "like" | "prediction" | "badge" | "watchlist" | "challenge" | "pinned";

@@ -8,6 +8,7 @@ import {
   getAllMatchPlayedPlayers,
   getAllMatchPlayers,
   getAllMatches,
+  getChallenges,
   getCurrentProfile,
   getCurrentUser,
   getLeagueStandings,
@@ -46,7 +47,7 @@ export default async function AdminPage() {
     );
   }
 
-  const [rumors, standings, players, seasonStats, matches, matchPlayers, playedPlayers, matchPlayerStats] = await Promise.all([
+  const [rumors, standings, players, seasonStats, matches, matchPlayers, playedPlayers, matchPlayerStats, challenges] = await Promise.all([
     getTransferRumors(),
     getLeagueStandings(),
     getPlayersCatalog(),
@@ -55,6 +56,7 @@ export default async function AdminPage() {
     getAllMatchPlayers(),
     getAllMatchPlayedPlayers(),
     getAllMatchPlayerStats(),
+    getChallenges(true),
   ]);
 
   return (
@@ -67,6 +69,7 @@ export default async function AdminPage() {
       matchPlayers={matchPlayers}
       playedPlayers={playedPlayers}
       matchPlayerStats={matchPlayerStats}
+      challenges={challenges}
     />
   );
 }

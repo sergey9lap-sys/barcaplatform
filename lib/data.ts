@@ -10,11 +10,13 @@ import { mockPlayerRankings } from "@/lib/mocks/player-rankings";
 import { mockManualPlayerSeasonStatsWithUsefulness } from "@/lib/mocks/player-season-stats";
 import { mockTransferRumors } from "@/lib/mocks/transfer-rumors";
 import { mockTransferIdeas } from "@/lib/mocks/transfer-ideas";
+import { getMockChallenges } from "@/lib/mocks/challenges";
 import { buildSeasonPlayerStats } from "@/lib/player-rankings/stats";
 import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type {
   DuelRecord,
+  ChallengeRecord,
   LeaderboardEntry,
   LeagueStanding,
   LineupPredictionRecord,
@@ -200,6 +202,19 @@ export async function getAllMatches() {
 
   const matches = ((data as Match[] | null) ?? []).filter((match) => new Date(match.kickoff_at) >= new Date("2026-08-01T00:00:00.000Z"));
   return matches.length ? matches : mockMatches;
+}
+
+export async function getChallenges(includeUnpublished = false) {
+  noStore();
+  const matches = await getAllMatches();
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) return getMockChallenges(matches);
+
+  let query = supabase.from("challenges").select("*").order("featured", { ascending: false }).order("created_at", { ascending: false });
+  if (!includeUnpublished) query = query.eq("status", "published");
+  const { data, error } = await query;
+  if (error || !data?.length) return getMockChallenges(matches);
+  return data as ChallengeRecord[];
 }
 
 export async function getMatchById(matchId: string) {

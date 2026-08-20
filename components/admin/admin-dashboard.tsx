@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ChallengeAdminPanel } from "@/components/admin/challenge-admin-panel";
 import { SECTION_BACKGROUNDS, createPhotoPanelStyle } from "@/lib/backgrounds";
 import { formatMatchDate } from "@/lib/format";
 import { formatPlayerPosition } from "@/lib/players/format";
@@ -13,6 +14,7 @@ import { createSupabaseClient } from "@/lib/supabase/client";
 import { formatTransferDirection, formatTransferStatus } from "@/lib/transfers/format";
 import type {
   LeagueStanding,
+  ChallengeRecord,
   Match,
   MatchPlayedPlayer,
   MatchPlayer,
@@ -45,6 +47,7 @@ interface AdminDashboardProps {
   matchPlayers: MatchPlayer[];
   playedPlayers: MatchPlayedPlayer[];
   matchPlayerStats: MatchPlayerStat[];
+  challenges: ChallengeRecord[];
 }
 
 const defaultRumor = {
@@ -71,6 +74,7 @@ export function AdminDashboard({
   matchPlayers,
   playedPlayers,
   matchPlayerStats,
+  challenges,
 }: AdminDashboardProps) {
   const router = useRouter();
   const [savingSection, setSavingSection] = useState<string | null>(null);
@@ -721,6 +725,8 @@ export function AdminDashboard({
 
       {error ? <p className="ui-status-error text-sm">{error}</p> : null}
       {message ? <p className="ui-status-success text-sm">{message}</p> : null}
+
+      <ChallengeAdminPanel challenges={challenges} matches={matches} players={players} />
 
       <Card className="barca-panel border-accent/15">
         <CardContent className="space-y-4 p-5">

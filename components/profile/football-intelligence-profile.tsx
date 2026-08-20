@@ -5,26 +5,33 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { FanArtwork } from "@/components/visuals/vip-artwork";
+import { getRankTitle } from "@/lib/community/gamification";
 import { defaultMasteryTracks, getMasteryLevel, getOverallXp } from "@/lib/community/mastery";
 import { loadMasteryTracks } from "@/lib/community/mastery-storage";
+import { getAccountLevelArtwork } from "@/lib/profile/artwork";
 
 export function FootballIntelligenceProfile() {
   const [tracks, setTracks] = useState(defaultMasteryTracks);
   useEffect(() => { void loadMasteryTracks().then(setTracks); }, []);
   const totalXp = useMemo(() => getOverallXp(tracks), [tracks]);
   const accountLevel = Math.floor(totalXp / 750) + 1;
+  const accountRank = getRankTitle(accountLevel);
   const nextLevelProgress = Math.round(((totalXp % 750) / 750) * 100);
 
   return (
     <Card className="barca-panel overflow-hidden border-accent/20">
       <CardContent className="space-y-5 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
+        <div className="grid gap-5 md:grid-cols-[180px_1fr]">
+          <FanArtwork id={getAccountLevelArtwork(accountLevel)} className="aspect-[3/4] w-36 rounded-2xl border border-white/10 bg-center md:h-full md:min-h-44 md:w-full" />
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
             <div className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-blue-300" /><p className="meta-label text-xs">Футбольный интеллект</p></div>
-            <h3 className="mt-2 text-2xl font-semibold">Уровень {accountLevel} · Тактический архитектор</h3>
+            <h3 className="mt-2 text-2xl font-semibold">Уровень {accountLevel} · {accountRank}</h3>
             <p className="ui-note mt-2 max-w-2xl text-sm">Общий уровень складывается из проверенных результатов во всех режимах. Ошибка не отнимает опыт, но влияет на точность конкретного навыка.</p>
+            </div>
+            <Badge variant="accent">{totalXp.toLocaleString("ru-RU")} опыта</Badge>
           </div>
-          <Badge variant="accent">{totalXp.toLocaleString("ru-RU")} опыта</Badge>
         </div>
 
         <div>

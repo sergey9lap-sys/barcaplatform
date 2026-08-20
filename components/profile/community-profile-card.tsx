@@ -9,6 +9,7 @@ import { FanArtwork } from "@/components/visuals/vip-artwork";
 import { calculateLevel, getPrimaryRole, getRankTitle } from "@/lib/community/gamification";
 import { COMMUNITY_PROFILE_UPDATED_EVENT, getStoredCommunityProfile } from "@/lib/community/storage";
 import { communityBadges, mockCommunityUsers } from "@/lib/mocks/community-users";
+import { getAccountLevelArtwork, getRoleArtwork } from "@/lib/profile/artwork";
 import type { CommunityUserRecord, Profile } from "@/types/database";
 
 const badgeNames: Record<string, string> = { "La Masia Scout": "Скаут Ла Масии", "Transfer Expert": "Трансферный эксперт", "Tactical Master": "Мастер тактики", "Lineup Prophet": "Пророк состава", "Elite Culé": "Элита кулес", "Barca DNA": "ДНК Барсы", "Stream Regular": "Завсегдатай эфиров", "Community Voice": "Голос сообщества" };
@@ -69,7 +70,10 @@ export function CommunityProfileCard({ profile, userId }: { profile: Profile | n
 
       <Card className="soft-panel overflow-hidden">
         <CardContent className="space-y-4 p-5">
-          <div className="grid gap-4 sm:grid-cols-[140px_1fr]"><FanArtwork id="tactician" className="h-36 rounded-3xl border border-white/10" /><div><p className="meta-label text-xs">Ваш стиль эксперта</p><h3 className="mt-2 text-xl font-semibold">{primaryRole}</h3><p className="ui-note mt-2 text-sm">Портрет меняется вместе с вашей сильнейшей футбольной компетенцией.</p></div></div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <ProfilePortrait artwork={getRoleArtwork(primaryRole)} label="Ваш стиль эксперта" title={primaryRole} description="Персонаж отражает вашу сильнейшую футбольную компетенцию." />
+            <ProfilePortrait artwork={getAccountLevelArtwork(level)} label="Уровень аккаунта" title={rankTitle} description={`Персонаж уровня меняется вместе с вашим прогрессом. Сейчас у вас ${level}-й уровень.`} />
+          </div>
           <p className="meta-label text-xs">Репутация по направлениям</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <Metric label="Аналитика" value={communityProfile.analyst_reputation} />
@@ -112,6 +116,19 @@ export function CommunityProfileCard({ profile, userId }: { profile: Profile | n
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function ProfilePortrait({ artwork, label, title, description }: { artwork: Parameters<typeof FanArtwork>[0]["id"]; label: string; title: string; description: string }) {
+  return (
+    <div className="grid grid-cols-[8.5rem_1fr] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025]">
+      <FanArtwork id={artwork} className="aspect-[3/4] h-full min-h-44 w-full border-r border-white/10 bg-center" />
+      <div className="self-center p-4">
+        <p className="meta-label text-xs">{label}</p>
+        <h3 className="mt-2 text-xl font-semibold">{title}</h3>
+        <p className="ui-note mt-2 text-sm">{description}</p>
+      </div>
     </div>
   );
 }

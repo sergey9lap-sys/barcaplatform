@@ -6,9 +6,11 @@ import { useEffect, useMemo, useState } from "react";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FanArtwork } from "@/components/visuals/vip-artwork";
 import { MOCK_LINEUP_USER_ID, getStoredLineupPredictions } from "@/lib/lineup/storage";
 import { MOCK_PLAYER_RANKING_USER_ID, getStoredPlayerRankingsForUser } from "@/lib/player-rankings/storage";
 import { buildFanProfileInsights } from "@/lib/profile/insights";
+import { getFanDnaArtwork, getGameRankArtwork } from "@/lib/profile/artwork";
 import { MOCK_USER_ID, getStoredPredictions } from "@/lib/predictions/storage";
 import { MOCK_TRANSFER_USER_ID, getStoredTransferPredictions } from "@/lib/transfers/storage";
 import type {
@@ -132,15 +134,21 @@ export function ProfileInsightsClient({
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-3xl border border-primary/20 bg-primary/10 p-5 shadow-glow">
-              <p className="meta-label text-xs">Стиль болельщика</p>
-              <p className="mt-3 text-2xl font-semibold text-[#f1d1db]">{insights.dna_title}</p>
-              <p className="mt-2 text-sm text-blue-100/75">{insights.dna_description}</p>
+            <div className="grid grid-cols-[8.5rem_1fr] overflow-hidden rounded-3xl border border-primary/20 bg-primary/10 shadow-glow">
+              <FanArtwork id={getFanDnaArtwork(insights.dna)} className="aspect-[3/4] h-full min-h-48 w-full border-r border-white/10 bg-center" />
+              <div className="self-center p-5">
+                <p className="meta-label text-xs">Стиль болельщика</p>
+                <p className="mt-3 text-2xl font-semibold text-[#f1d1db]">{insights.dna_title}</p>
+                <p className="mt-2 text-sm text-blue-100/75">{insights.dna_description}</p>
+              </div>
             </div>
-            <div className="rounded-3xl border border-accent/20 bg-accent/10 p-5 shadow-glow">
-              <p className="meta-label text-xs">Игровой уровень</p>
-              <p className="mt-3 text-2xl font-semibold text-[#245ac7]">{insights.rank_title}</p>
-              <p className="mt-2 text-sm text-blue-100/75">{insights.rank_description}</p>
+            <div className="grid grid-cols-[8.5rem_1fr] overflow-hidden rounded-3xl border border-accent/20 bg-accent/10 shadow-glow">
+              <FanArtwork id={getGameRankArtwork(insights.rank)} className="aspect-[3/4] h-full min-h-48 w-full border-r border-white/10 bg-center" />
+              <div className="self-center p-5">
+                <p className="meta-label text-xs">Игровой уровень</p>
+                <p className="mt-3 text-2xl font-semibold text-[#9dc8ff]">{insights.rank_title}</p>
+                <p className="mt-2 text-sm text-blue-100/75">{insights.rank_description}</p>
+              </div>
             </div>
           </div>
 

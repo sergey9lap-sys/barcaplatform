@@ -11,11 +11,11 @@ export default async function TransfersPage() {
   const predictions = await getTransferPredictionsForUser(user?.id);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Card className="hero-panel" style={createPhotoPanelStyle(SECTION_BACKGROUNDS.transfersHero, { position: "center 23%" })}>
-        <CardContent className="p-5">
+        <CardContent className="p-4">
           <p className="meta-label text-xs">Трансферы</p>
-          <h2 className="mt-2 text-2xl font-semibold">Transfer Hub 2.0: окно, аренды и решения сообщества</h2>
+          <h2 className="mt-1.5 text-xl font-semibold sm:text-2xl">Transfer Hub 2.0: окно, аренды и решения сообщества</h2>
           <p className="mt-2 text-sm text-blue-100/75">
             Оценивайте входящие и исходящие сценарии через Barca Fit, Coach System Fit, риск, цену и голос сообщества.
           </p>

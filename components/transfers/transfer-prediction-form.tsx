@@ -136,14 +136,18 @@ export function TransferPredictionForm({
   }
 
   return (
-    <div className="space-y-4">
+    <details className="rounded-xl border border-white/10 bg-white/[0.025] p-3">
+      <summary className="cursor-pointer text-sm font-semibold text-blue-100">
+        {isOpen ? "Сделать прогноз на трансфер" : "Результат трансферного прогноза"}
+      </summary>
+      <div className="mt-3 space-y-3">
       {backendEnabled && !userId ? (
-        <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4 text-sm ui-value">
+        <div className="rounded-xl border border-primary/20 bg-primary/10 p-3 text-sm ui-value">
           Чтобы сохранять трансферные прогнозы, сначала <Link className="underline" href="/auth">войдите в аккаунт</Link>.
         </div>
       ) : null}
 
-      <div className="grid gap-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         {options.map((option) => (
           <button
             key={option.value}
@@ -151,7 +155,7 @@ export function TransferPredictionForm({
             onClick={() => setSelectedPrediction(option.value)}
             disabled={!isOpen}
             className={cn(
-              "rounded-2xl border px-4 py-3 text-left transition-colors",
+              "rounded-xl border px-3 py-2.5 text-left transition-colors",
               selectedPrediction === option.value
                 ? "border-primary/50 bg-primary/12 text-[#f1d1db] shadow-glow"
                 : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-[#f1d1db]",
@@ -168,7 +172,7 @@ export function TransferPredictionForm({
         ))}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-white/10 bg-white/[0.03] p-2.5 text-sm text-muted-foreground">
         {savedPrediction ? (
           <p>
             Ваш прогноз:{" "}
@@ -202,6 +206,7 @@ export function TransferPredictionForm({
       <Button className="w-full" onClick={handleSave} disabled={!isOpen || (backendEnabled && !userId)}>
         {!isOpen ? "Прогноз закрыт" : savedPrediction ? "Обновить прогноз" : "Сохранить прогноз"}
       </Button>
-    </div>
+      </div>
+    </details>
   );
 }

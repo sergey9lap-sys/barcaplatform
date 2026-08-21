@@ -135,7 +135,7 @@ export default async function HomePage() {
             Все челленджи
           </Link>
         </div>
-        <HomeFeatureCard label="Ежедневная серия" title="Новый челлендж уже открыт" text="Заберите ежедневный бонус, ответьте на вопрос или выполните задание ближайшего матча." href="/challenges" cta="Открыть челленджи" artwork="challenges" />
+        <HomeFeatureCard label="Ежедневная серия" title="Новый челлендж уже открыт" text="Заберите ежедневный бонус, ответьте на вопрос или выполните задание ближайшего матча." href="/challenges" cta="Открыть челленджи" artwork="challenges" featured />
       </section>
 
       <section className="space-y-3">
@@ -290,6 +290,7 @@ function HomeFeatureCard({
   href,
   cta,
   artwork,
+  featured = false,
 }: {
   label: string;
   title: string;
@@ -297,17 +298,20 @@ function HomeFeatureCard({
   href: string;
   cta: string;
   artwork?: SectionArtworkId;
+  featured?: boolean;
 }) {
   return (
     <Card className="soft-panel">
-      <CardContent className="space-y-3 p-5">
-        {artwork ? <SectionArtworkBanner id={artwork} className="mb-4 aspect-video w-full rounded-2xl" /> : null}
-        <p className="meta-label text-xs">{label}</p>
-        <p className="ui-value text-xl font-semibold">{title}</p>
-        <p className="ui-note text-sm">{text}</p>
-        <Button asChild variant="secondary" size="sm">
-          <Link href={href}>{cta}</Link>
-        </Button>
+      <CardContent className={featured ? "grid gap-4 p-4 lg:grid-cols-[minmax(18rem,0.8fr)_minmax(0,1.2fr)] lg:items-center" : "p-4"}>
+        {artwork ? <SectionArtworkBanner id={artwork} className={featured ? "h-40 w-full rounded-xl sm:h-48 lg:h-52" : "h-36 w-full rounded-xl sm:h-40 lg:h-28 xl:h-32"} /> : null}
+        <div className={featured ? "space-y-2.5" : "mt-2.5 space-y-2"}>
+          <p className="meta-label text-xs">{label}</p>
+          <p className="ui-value text-lg font-semibold">{title}</p>
+          <p className="ui-note text-sm leading-5">{text}</p>
+          <Button asChild variant="secondary" size="sm">
+            <Link href={href}>{cta}</Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

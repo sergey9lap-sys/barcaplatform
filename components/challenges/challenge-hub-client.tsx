@@ -119,25 +119,25 @@ export function ChallengeHubClient({ initialChallenges, matches, userId, backend
   }
 
   return (
-    <div className="space-y-6">
-      <section className="hero-panel border-0 p-6 sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[1fr_320px] lg:items-end">
+    <div className="space-y-4">
+      <section className="hero-panel border-0 p-5 sm:p-6">
+        <div className="grid gap-4 lg:grid-cols-[1fr_280px] lg:items-end">
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={context.mode === "matchday" ? "primary" : "accent"}>{context.label}</Badge>
               {context.match ? <Badge variant="accent">{context.match.home_team} — {context.match.away_team}</Badge> : null}
             </div>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold sm:text-4xl">Челленджи, которые меняются вместе с футбольным днём</h2>
-            <p className="ui-note mt-3 max-w-2xl text-sm sm:text-base">{context.description}</p>
+            <h2 className="mt-3 max-w-3xl text-2xl font-semibold sm:text-3xl">Челленджи, которые меняются вместе с футбольным днём</h2>
+            <p className="ui-note mt-2 max-w-2xl text-sm">{context.description}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-black/20 p-4">
+            <div className="rounded-xl bg-black/20 p-3">
               <div className="flex items-center gap-2 text-amber-200"><Coins className="h-4 w-4" /><span className="text-sm">Монеты</span></div>
-              <p className="mt-2 text-2xl font-semibold tabular-nums">{wallet.coins}</p>
+              <p className="mt-1.5 text-xl font-semibold tabular-nums">{wallet.coins}</p>
             </div>
-            <div className="rounded-2xl bg-black/20 p-4">
+            <div className="rounded-xl bg-black/20 p-3">
               <div className="flex items-center gap-2 text-rose-200"><Flame className="h-4 w-4" /><span className="text-sm">Серия</span></div>
-              <p className="mt-2 text-2xl font-semibold tabular-nums">{formatDayCount(wallet.current_streak)}</p>
+              <p className="mt-1.5 text-xl font-semibold tabular-nums">{formatDayCount(wallet.current_streak)}</p>
             </div>
           </div>
         </div>
@@ -148,13 +148,13 @@ export function ChallengeHubClient({ initialChallenges, matches, userId, backend
 
       <DailyBonus wallet={wallet} claimed={dailyClaimed} onClaim={() => void claimBonus()} />
 
-      <section className="space-y-4">
+      <section className="space-y-3">
         <div className="flex items-end justify-between gap-4">
-          <div><h3 className="text-2xl font-semibold">Сегодня</h3><p className="ui-note mt-1 text-sm">Задания обновляются в зависимости от расписания и статуса матча.</p></div>
+          <div><h3 className="text-xl font-semibold">Сегодня</h3><p className="ui-note mt-1 text-sm">Задания обновляются в зависимости от расписания и статуса матча.</p></div>
           <Badge variant="accent">{completedIds.size} выполнено</Badge>
         </div>
         {dailyChallenges.length ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {dailyChallenges.map((challenge) => (
               <ChallengeCard key={challenge.id} challenge={challenge} context={context} submission={submissions.find((item) => item.challenge_id === challenge.id) ?? null} answer={answers[challenge.id]} setAnswer={(value) => setAnswers((current) => ({ ...current, [challenge.id]: value }))} saving={savingId === challenge.id} onSubmit={() => void submitChallenge(challenge)} />
             ))}
@@ -164,7 +164,7 @@ export function ChallengeHubClient({ initialChallenges, matches, userId, backend
         )}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className="grid gap-3 lg:grid-cols-2">
         {progressChallenges.map((challenge) => {
           const value = challenge.cadence === "weekly" ? dailyCompletionCount : monthlyCompletionCount;
           return <ProgressChallenge key={challenge.id} challenge={challenge} value={value} completed={completedIds.has(challenge.id)} onClaim={() => void submitChallenge(challenge)} />;
@@ -180,11 +180,11 @@ function DailyBonus({ wallet, claimed, onClaim }: { wallet: ChallengeWalletRecor
   const nextDay = wallet.current_streak >= 7 ? 1 : wallet.current_streak + 1;
   return (
     <Card className="barca-panel border-accent/15">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
+      <CardContent className="grid gap-4 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <div className="flex items-center gap-3"><Gift className="h-6 w-6 text-amber-300" /><h3 className="text-xl font-semibold">Ежедневный подарок</h3></div>
+          <div className="flex items-center gap-2.5"><Gift className="h-5 w-5 text-amber-300" /><h3 className="text-lg font-semibold">Ежедневный подарок</h3></div>
           <p className="ui-note mt-2 text-sm">За вход начисляются только монеты. Игровой опыт остаётся наградой за проверяемые футбольные действия.</p>
-          <div className="mt-4 grid grid-cols-7 gap-1.5">
+          <div className="mt-3 grid grid-cols-7 gap-1.5">
             {rewards.map((reward, index) => {
               const day = index + 1;
               const active = day === (wallet.current_streak || 1);
@@ -202,14 +202,14 @@ function ChallengeCard({ challenge, context, submission, answer, setAnswer, savi
   const route = resolveChallengeRoute(challenge, context);
   return (
     <Card className="barca-panel border-accent/15">
-      <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_260px]">
+      <CardContent className="grid gap-4 p-4 lg:grid-cols-[1fr_240px]">
         <div>
           <div className="flex flex-wrap items-center gap-2"><Badge variant="accent">{CHALLENGE_LABELS.phase[challenge.phase]}</Badge><Badge variant="primary">+{challenge.reward_coins} монет</Badge>{challenge.reward_xp ? <Badge variant="accent">до +{challenge.reward_xp} опыта</Badge> : null}</div>
-          <h3 className="mt-4 text-xl font-semibold sm:text-2xl">{challenge.title}</h3>
+          <h3 className="mt-3 text-lg font-semibold sm:text-xl">{challenge.title}</h3>
           <p className="ui-note mt-2 text-sm">{challenge.description}</p>
-          <div className="mt-5"><ChallengeAnswer challenge={challenge} value={answer} onChange={setAnswer} disabled={Boolean(submission)} /></div>
+          <div className="mt-3"><ChallengeAnswer challenge={challenge} value={answer} onChange={setAnswer} disabled={Boolean(submission)} /></div>
         </div>
-        <div className="flex flex-col justify-between gap-4 rounded-2xl bg-black/15 p-4">
+        <div className="flex flex-col justify-between gap-3 rounded-xl bg-black/15 p-3">
           <div className="space-y-3 text-sm">
             <p className="flex items-center gap-2 text-blue-100/80"><CalendarCheck className="h-4 w-4 text-blue-300" />{CHALLENGE_LABELS.cadence[challenge.cadence]}</p>
             <p className="flex items-center gap-2 text-blue-100/80"><Clock3 className="h-4 w-4 text-rose-300" />{CHALLENGE_LABELS.verification[challenge.verification_type]}</p>
@@ -248,17 +248,17 @@ function Consensus({ challenge, submission }: { challenge: ChallengeRecord; subm
   const selected = typeof submission.answer === "object" && submission.answer ? (submission.answer as { value?: string }).value : null;
   const options = challenge.options.map((option) => ({ ...option, votes: (option.votes ?? 0) + (selected === option.id ? 1 : 0) }));
   const total = Math.max(1, options.reduce((sum, option) => sum + (option.votes ?? 0), 0));
-  return <div className="space-y-3 border-t border-white/10 pt-5 lg:col-span-2"><p className="text-sm font-semibold text-blue-100">Мнение сообщества</p>{options.map((option) => <div key={option.id}><div className="flex justify-between gap-4 text-xs"><span className={selected === option.id ? "text-rose-200" : "text-blue-100/75"}>{option.label}</span><span className="tabular-nums text-blue-100/65">{Math.round(((option.votes ?? 0) / total) * 100)}%</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-rose-500" style={{ width: `${((option.votes ?? 0) / total) * 100}%` }} /></div></div>)}</div>;
+  return <div className="space-y-3 border-t border-white/10 pt-4 lg:col-span-2"><p className="text-sm font-semibold text-blue-100">Мнение сообщества</p>{options.map((option) => <div key={option.id}><div className="flex justify-between gap-4 text-xs"><span className={selected === option.id ? "text-rose-200" : "text-blue-100/75"}>{option.label}</span><span className="tabular-nums text-blue-100/65">{Math.round(((option.votes ?? 0) / total) * 100)}%</span></div><div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-rose-500" style={{ width: `${((option.votes ?? 0) / total) * 100}%` }} /></div></div>)}</div>;
 }
 
 function ProgressChallenge({ challenge, value, completed, onClaim }: { challenge: ChallengeRecord; value: number; completed: boolean; onClaim: () => void }) {
   const progress = Math.min(100, Math.round((value / challenge.target_count) * 100));
-  return <Card className="barca-panel border-accent/15"><CardContent className="p-5"><div className="flex items-start justify-between gap-4"><div><Badge variant="accent">{CHALLENGE_LABELS.cadence[challenge.cadence]}</Badge><h3 className="mt-3 text-xl font-semibold">{challenge.title}</h3><p className="ui-note mt-2 text-sm">{challenge.description}</p></div><Trophy className="h-7 w-7 text-amber-300" /></div><div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-rose-500" style={{ width: `${progress}%` }} /></div><div className="mt-3 flex items-center justify-between text-sm"><span className="ui-note">{Math.min(value, challenge.target_count)} из {challenge.target_count}</span><span className="text-amber-100">+{challenge.reward_coins} монет</span></div><Button className="mt-4 w-full" variant="outline" disabled={completed || value < challenge.target_count} onClick={onClaim}>{completed ? "Награда получена" : value >= challenge.target_count ? "Забрать награду" : "Продолжить серию"}</Button></CardContent></Card>;
+  return <Card className="barca-panel border-accent/15"><CardContent className="p-4"><div className="flex items-start justify-between gap-4"><div><Badge variant="accent">{CHALLENGE_LABELS.cadence[challenge.cadence]}</Badge><h3 className="mt-2.5 text-lg font-semibold">{challenge.title}</h3><p className="ui-note mt-1.5 text-sm">{challenge.description}</p></div><Trophy className="h-6 w-6 text-amber-300" /></div><div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-rose-500" style={{ width: `${progress}%` }} /></div><div className="mt-2.5 flex items-center justify-between text-sm"><span className="ui-note">{Math.min(value, challenge.target_count)} из {challenge.target_count}</span><span className="text-amber-100">+{challenge.reward_coins} монет</span></div><Button className="mt-3 w-full" variant="outline" disabled={completed || value < challenge.target_count} onClick={onClaim}>{completed ? "Награда получена" : value >= challenge.target_count ? "Забрать награду" : "Продолжить серию"}</Button></CardContent></Card>;
 }
 
 function ChallengeHistory({ submissions, challenges }: { submissions: ChallengeSubmissionRecord[]; challenges: ChallengeRecord[] }) {
   const challengeMap = new Map(challenges.map((item) => [item.id, item]));
-  return <section className="space-y-4"><div><h3 className="text-2xl font-semibold">История челленджей</h3><p className="ui-note mt-1 text-sm">Сохранённые ответы и задания, которые ещё ждут проверки.</p></div><Card className="soft-panel"><CardContent className="divide-y divide-white/10 p-0">{submissions.length ? submissions.slice(0, 8).map((submission) => <div key={submission.id} className="flex items-center justify-between gap-4 px-5 py-4"><div><p className="ui-value text-sm font-semibold">{challengeMap.get(submission.challenge_id)?.title ?? "Челлендж"}</p><p className="ui-note mt-1 text-xs">{new Date(submission.submitted_at).toLocaleString("ru-RU")}</p></div><div className="text-right"><p className="text-sm text-amber-100">+{submission.coins_awarded} монет</p><p className="ui-note mt-1 text-xs">{submission.status === "pending" ? "На проверке" : submission.status === "verified" ? "Завершён" : "Не подтверждён"}</p></div></div>) : <div className="p-5"><p className="ui-value font-semibold">История пока пуста</p><p className="ui-note mt-2 text-sm">Выполните первый челлендж — он появится здесь.</p></div>}</CardContent></Card></section>;
+  return <section className="space-y-3"><div><h3 className="text-xl font-semibold">История челленджей</h3><p className="ui-note mt-1 text-sm">Сохранённые ответы и задания, которые ещё ждут проверки.</p></div><Card className="soft-panel"><CardContent className="divide-y divide-white/10 p-0">{submissions.length ? submissions.slice(0, 8).map((submission) => <div key={submission.id} className="flex items-center justify-between gap-4 px-4 py-3"><div><p className="ui-value text-sm font-semibold">{challengeMap.get(submission.challenge_id)?.title ?? "Челлендж"}</p><p className="ui-note mt-1 text-xs">{new Date(submission.submitted_at).toLocaleString("ru-RU")}</p></div><div className="text-right"><p className="text-sm text-amber-100">+{submission.coins_awarded} монет</p><p className="ui-note mt-1 text-xs">{submission.status === "pending" ? "На проверке" : submission.status === "verified" ? "Завершён" : "Не подтверждён"}</p></div></div>) : <div className="p-4"><p className="ui-value font-semibold">История пока пуста</p><p className="ui-note mt-2 text-sm">Выполните первый челлендж — он появится здесь.</p></div>}</CardContent></Card></section>;
 }
 
 function normalizeAnswer(challenge: ChallengeRecord, value: unknown, route: string | null) {

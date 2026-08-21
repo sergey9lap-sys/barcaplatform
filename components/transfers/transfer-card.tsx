@@ -23,10 +23,10 @@ export function TransferCard({
   const playerImage = getPlayerAvatarPath(rumor.player_name, rumor.image_url);
   return (
     <Card className="barca-panel border-accent/15">
-      <CardHeader className="space-y-4">
+      <CardHeader className="space-y-3 p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-3xl border border-white/10 bg-white/[.04]">{playerImage ? <img src={playerImage} alt={rumor.player_name} className="h-full w-full object-cover object-top" /> : <span className="grid h-full w-full place-items-center text-lg font-semibold">{rumor.player_name.slice(0, 2)}</span>}</div>
+            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/[.04]">{playerImage ? <img src={playerImage} alt={rumor.player_name} className="h-full w-full object-cover object-top" /> : <span className="grid h-full w-full place-items-center text-lg font-semibold">{rumor.player_name.slice(0, 2)}</span>}</div>
             <div>
             <p className="meta-label text-xs">{rumor.window_label} · {formatTransferDirection(rumor.direction)}</p>
             <CardTitle className="mt-2 text-xl">{rumor.player_name}</CardTitle>
@@ -39,7 +39,7 @@ export function TransferCard({
             {formatTransferStatus(rumor.status)}
           </Badge>
         </div>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
           <div>
             <p className="meta-label text-xs">Сейчас</p>
             <p className="ui-value mt-1 text-sm font-medium">{rumor.current_club}</p>
@@ -50,7 +50,7 @@ export function TransferCard({
             <p className="ui-value mt-1 text-sm font-medium">{rumor.target_club}</p>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-7">
           <div className="ui-data-card">
             <p className="meta-label text-xs">Вероятность</p>
             <p className="ui-value mt-2 text-lg font-semibold">{rumor.probability_score ?? "—"}/10</p>
@@ -63,8 +63,6 @@ export function TransferCard({
             <p className="meta-label text-xs">Решение</p>
             <p className="ui-value mt-2 text-sm font-semibold">{formatRecommendation(rumor.recommendation, rumor.direction)}</p>
           </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-4">
           <ScoreBadge
             title="Под Барсу"
             value={rumor.barca_fit_score ?? 0}
@@ -86,53 +84,24 @@ export function TransferCard({
             <p className="ui-note mt-1 text-xs">{rumor.community_votes ?? 0} голосов</p>
           </div>
         </div>
-        {rumor.short_reason ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm ui-note">
-            {rumor.short_reason}
-          </div>
-        ) : null}
-        {rumor.notes ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm ui-note">
-            {rumor.notes}
-          </div>
-        ) : null}
+        {rumor.short_reason || rumor.notes ? <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm leading-5 ui-note">{rumor.short_reason ?? rumor.notes}</div> : null}
       </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <CommunityConsensus
-            options={
-              rumor.direction === "incoming"
-                ? [
-                    { label: "Купить", votes: rumor.decision === "buy" ? 58 : 31 },
-                    { label: "Не покупать", votes: 14 },
-                    { label: "Следить", votes: rumor.decision === "monitor" ? 42 : 21 },
-                    { label: "Слишком рискованно", votes: rumor.risk_level === "high" ? 37 : 12 },
-                  ]
-                : rumor.direction === "loan"
-                  ? [
-                      { label: "Вернуть", votes: 24 },
-                      { label: "Продать", votes: 16 },
-                      { label: "Оставить в аренде", votes: 31 },
-                      { label: "Дать шанс на сборах", votes: 44 },
-                    ]
-                  : [
-                      { label: "Продать", votes: rumor.decision === "sell" ? 49 : 22 },
-                      { label: "Оставить", votes: rumor.decision === "keep" ? 45 : 19 },
-                      { label: "Следить", votes: 21 },
-                      { label: "Слишком рискованно", votes: 13 },
-                    ]
-            }
-          />
-        </div>
+      <CardContent className="p-4 pt-0">
         <TransferPredictionForm
           rumor={rumor}
           initialPrediction={prediction}
           userId={userId}
           backendEnabled={backendEnabled}
         />
-        <div className="mt-4">
-          <ExplainYourTake targetType="transfer" targetId={rumor.id} />
-        </div>
+        <details className="mt-3 rounded-xl border border-white/10 bg-white/[0.025] p-3">
+          <summary className="cursor-pointer text-sm font-semibold text-blue-100">Мнение сообщества и обсуждение</summary>
+          <div className="mt-3 space-y-3">
+            <CommunityConsensus
+              options={rumor.direction === "incoming" ? [{ label: "Купить", votes: rumor.decision === "buy" ? 58 : 31 }, { label: "Не покупать", votes: 14 }, { label: "Следить", votes: rumor.decision === "monitor" ? 42 : 21 }, { label: "Слишком рискованно", votes: rumor.risk_level === "high" ? 37 : 12 }] : rumor.direction === "loan" ? [{ label: "Вернуть", votes: 24 }, { label: "Продать", votes: 16 }, { label: "Оставить в аренде", votes: 31 }, { label: "Дать шанс на сборах", votes: 44 }] : [{ label: "Продать", votes: rumor.decision === "sell" ? 49 : 22 }, { label: "Оставить", votes: rumor.decision === "keep" ? 45 : 19 }, { label: "Следить", votes: 21 }, { label: "Слишком рискованно", votes: 13 }]}
+            />
+            <ExplainYourTake targetType="transfer" targetId={rumor.id} />
+          </div>
+        </details>
       </CardContent>
     </Card>
   );
@@ -140,7 +109,7 @@ export function TransferCard({
 
 function ScoreBadge({ title, value, caption }: { title: string; value: number; caption: string }) {
   return (
-    <div className="ui-data-card">
+    <div className="ui-data-card" title={caption}>
       <p className="meta-label text-xs">{title}</p>
       <div className="mt-2 h-2 rounded-full bg-white/10">
         <div
@@ -149,7 +118,7 @@ function ScoreBadge({ title, value, caption }: { title: string; value: number; c
         />
       </div>
       <p className="ui-value mt-2 text-lg font-semibold">{value || "—"}/100</p>
-      <p className="ui-note mt-1 text-xs">{caption}</p>
+      <span className="sr-only">{caption}</span>
     </div>
   );
 }

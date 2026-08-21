@@ -477,7 +477,7 @@ label {
   .home-feed {
     display: flex;
     flex-direction: column;
-    gap: clamp(1.8rem, 4vw, 3.75rem);
+    gap: clamp(1.25rem, 2.5vw, 2rem);
   }
 
   .premium-card,
@@ -499,7 +499,7 @@ label {
   }
 
   .home-hero {
-    min-height: clamp(31rem, 60vw, 42rem);
+    min-height: clamp(24rem, 42vw, 32rem);
   }
 
   .hero-panel h2 {
@@ -554,7 +554,7 @@ label {
     max-width: 11ch;
     margin-top: 1.25rem;
     color: #fff;
-    font-size: clamp(2.7rem, 7vw, 5.7rem);
+    font-size: clamp(2.5rem, 6vw, 4.7rem);
     font-weight: 780;
     line-height: 0.94;
     letter-spacing: -0.04em;
@@ -563,7 +563,7 @@ label {
 
   .hero-lede {
     max-width: 38rem;
-    margin: 1.4rem 0 1.8rem;
+    margin: 1rem 0 1.35rem;
     color: rgba(235, 240, 255, 0.78);
     font-size: clamp(1rem, 2vw, 1.2rem);
     line-height: 1.58;

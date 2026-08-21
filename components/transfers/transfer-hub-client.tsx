@@ -45,7 +45,7 @@ export function TransferHubClient({
   const communityRanking = [...rumors].sort((a, b) => (b.community_votes ?? 0) - (a.community_votes ?? 0));
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <div className="no-scrollbar overflow-x-auto">
         <div className="flex min-w-max gap-2">
           {tabs.map((tab) => (
@@ -95,9 +95,9 @@ export function TransferHubClient({
       ) : null}
 
       {activeTab === "ideas" ? (
-        <section className="space-y-4">
+        <section className="space-y-3">
           <Card className="barca-panel border-accent/15">
-            <CardContent className="space-y-4 p-5">
+            <CardContent className="space-y-3 p-4">
               <div>
                 <p className="meta-label text-xs">Своя идея</p>
                 <h3 className="mt-2 text-xl font-semibold">Добавить желаемый трансфер</h3>
@@ -116,7 +116,7 @@ export function TransferHubClient({
 
       {activeTab === "community" ? (
         <section className="space-y-3">
-          <div className="spotlight-strip">
+          <div className="spotlight-strip px-4 py-3">
             <p className="meta-label text-xs">Рейтинг сообщества</p>
             <h3 className="mt-2 text-xl font-semibold">Самые обсуждаемые решения окна</h3>
           </div>
@@ -157,8 +157,8 @@ function HubList({
   backendEnabled?: boolean;
 }) {
   return (
-    <section className="space-y-4">
-      <div className="spotlight-strip">
+    <section className="space-y-3">
+      <div className="spotlight-strip px-4 py-3">
         <p className="meta-label text-xs">Transfer Hub 2.0</p>
         <h3 className="mt-2 text-xl font-semibold">{title}</h3>
       </div>

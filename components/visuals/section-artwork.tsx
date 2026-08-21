@@ -20,7 +20,10 @@ export function SectionArtwork({ id, className, priority = false }: { id: Sectio
   const style = {
     backgroundImage: "url('/visuals/section-worlds-v2-cinematic.png')",
     backgroundPosition: POSITIONS[id],
-    backgroundSize: "300% 300%",
+    // The source is a 3×3 grid of square artworks. Scaling both axes to the
+    // container distorted every non-square banner; width-only scaling keeps
+    // each cell square and crops wide cards like a real cover image.
+    backgroundSize: "300% auto",
   } satisfies CSSProperties;
 
   return <span aria-hidden="true" data-priority={priority || undefined} className={cn("section-artwork", className)} style={style} />;

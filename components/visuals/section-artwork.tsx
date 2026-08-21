@@ -28,3 +28,18 @@ export function SectionArtwork({ id, className, priority = false }: { id: Sectio
 
   return <span aria-hidden="true" data-priority={priority || undefined} className={cn("section-artwork", className)} style={style} />;
 }
+
+export function SectionArtworkBanner({ id, className }: { id: SectionArtworkId; className?: string }) {
+  const artworkStyle = {
+    backgroundImage: "url('/visuals/section-worlds-v2-cinematic.png')",
+    backgroundPosition: POSITIONS[id],
+    backgroundSize: "300% 300%",
+  } satisfies CSSProperties;
+
+  return (
+    <span aria-hidden="true" className={cn("section-artwork relative overflow-hidden bg-[#050916]", className)}>
+      <span className="absolute left-1/2 top-1/2 aspect-square w-[64%] -translate-x-1/2 -translate-y-1/2 bg-no-repeat" style={artworkStyle} />
+      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,9,22,0.92)_0%,transparent_24%,transparent_76%,rgba(5,9,22,0.92)_100%)]" />
+    </span>
+  );
+}

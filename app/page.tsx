@@ -28,7 +28,7 @@ import {
 import { getSupabaseEnv } from "@/lib/env";
 import { mockLoanPlayers } from "@/lib/mocks/loan-players";
 import { formatMatchDate } from "@/lib/format";
-import { SectionArtwork, type SectionArtworkId } from "@/components/visuals/section-artwork";
+import { SectionArtwork, SectionArtworkBanner, type SectionArtworkId } from "@/components/visuals/section-artwork";
 
 export default async function HomePage() {
   const { configured } = getSupabaseEnv();
@@ -301,7 +301,7 @@ function HomeFeatureCard({
   return (
     <Card className="soft-panel">
       <CardContent className="space-y-3 p-5">
-        {artwork ? <SectionArtwork id={artwork} className="mb-4 aspect-[16/7] w-full rounded-2xl" /> : null}
+        {artwork ? <SectionArtworkBanner id={artwork} className="mb-4 aspect-video w-full rounded-2xl" /> : null}
         <p className="meta-label text-xs">{label}</p>
         <p className="ui-value text-xl font-semibold">{title}</p>
         <p className="ui-note text-sm">{text}</p>

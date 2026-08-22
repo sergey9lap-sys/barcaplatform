@@ -37,10 +37,10 @@ const currentSquad = [
 ] as const;
 
 const matchIds = [
-  "laliga-2026-01",
-  "laliga-2026-02",
-  "laliga-2026-03",
-  "laliga-2026-04",
+  "26000000-0000-4000-8000-000000000001",
+  "26000000-0000-4000-8000-000000000002",
+  "26000000-0000-4000-8000-000000000003",
+  "26000000-0000-4000-8000-000000000004",
 ] as const;
 
 export const mockMatchPlayers: MatchPlayer[] = matchIds.flatMap((matchId, matchIndex) =>

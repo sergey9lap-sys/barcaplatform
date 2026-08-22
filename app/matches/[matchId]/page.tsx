@@ -23,8 +23,16 @@ interface MatchDetailPageProps {
   params: Promise<{ matchId: string }>;
 }
 
+const legacyMatchIds: Record<string, string> = {
+  "laliga-2026-01": "26000000-0000-4000-8000-000000000001",
+  "laliga-2026-02": "26000000-0000-4000-8000-000000000002",
+  "laliga-2026-03": "26000000-0000-4000-8000-000000000003",
+  "laliga-2026-04": "26000000-0000-4000-8000-000000000004",
+};
+
 export default async function MatchDetailPage({ params }: MatchDetailPageProps) {
-  const { matchId } = await params;
+  const { matchId: routeMatchId } = await params;
+  const matchId = legacyMatchIds[routeMatchId] ?? routeMatchId;
   const { configured } = getSupabaseEnv();
   const [user, match, players] = await Promise.all([getCurrentUser(), getMatchById(matchId), getMatchPlayers(matchId)]);
 

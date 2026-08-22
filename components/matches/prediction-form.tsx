@@ -13,18 +13,6 @@ import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
 import type { Match, MatchPredictionRecord, PredictionChoice } from "@/types/database";
 import { cn } from "@/lib/utils";
 
-const resultOptions: { value: PredictionChoice; label: string; description: string }[] = [
-  { value: "home", label: "Победа", description: "Барса берёт три очка" },
-  { value: "draw", label: "Ничья", description: "Равная игра и раздел очков" },
-  { value: "away", label: "Поражение", description: "Соперник забирает результат" },
-];
-
-const resultLabels: Record<PredictionChoice, string> = {
-  home: "победа",
-  draw: "ничья",
-  away: "поражение",
-};
-
 interface PredictionFormProps {
   match: Match;
   initialPrediction?: MatchPredictionRecord | null;
@@ -33,7 +21,7 @@ interface PredictionFormProps {
 }
 
 export function PredictionForm({ match, initialPrediction = null, userId = null, backendEnabled = false }: PredictionFormProps) {
-  const [selectedResult, setSelectedResult] = useState<PredictionChoice>("home");
+  const [selectedResult, setSelectedResult] = useState<PredictionChoice>(() => match.home_team === "Барселона" ? "home" : "away");
   const [homeScore, setHomeScore] = useState("");
   const [awayScore, setAwayScore] = useState("");
   const [savedPrediction, setSavedPrediction] = useState<MatchPredictionRecord | null>(null);
@@ -42,6 +30,7 @@ export function PredictionForm({ match, initialPrediction = null, userId = null,
 
   const isOpen = match.status === "upcoming";
   const requiresAuth = backendEnabled;
+  const resultOptions = getResultOptions(match);
 
   useEffect(() => {
     if (backendEnabled) {
@@ -132,7 +121,11 @@ export function PredictionForm({ match, initialPrediction = null, userId = null,
         .single();
 
       if (saveError || !data) {
-        setError(saveError?.message ?? "Не удалось сохранить прогноз.");
+        setError(
+          saveError?.code === "23503"
+            ? "Матч ещё не синхронизирован с базой. Выполните последнее обновление Supabase и повторите сохранение."
+            : "Не удалось сохранить прогноз. Попробуйте ещё раз.",
+        );
         return;
       }
 
@@ -246,7 +239,7 @@ export function PredictionForm({ match, initialPrediction = null, userId = null,
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-muted-foreground">
             {savedPrediction ? (
               <p>
-                Сохранённый прогноз: <span className="text-[#f1d1db]">{resultLabels[savedPrediction.result]}</span>, счёт{" "}
+                Сохранённый прогноз: <span className="text-[#f1d1db]">{formatBarcaResult(savedPrediction.result, match)}</span>, счёт{" "}
                 <span className="ui-value">
                   {savedPrediction.score.home ?? "-"}:{savedPrediction.score.away ?? "-"}
                 </span>
@@ -271,4 +264,19 @@ export function PredictionForm({ match, initialPrediction = null, userId = null,
       </CardContent>
     </Card>
   );
+}
+
+function getResultOptions(match: Match): { value: PredictionChoice; label: string; description: string }[] {
+  const barcaIsHome = match.home_team === "Барселона";
+  return [
+    { value: barcaIsHome ? "home" : "away", label: "Победа", description: "Барса берёт три очка" },
+    { value: "draw", label: "Ничья", description: "Равная игра и раздел очков" },
+    { value: barcaIsHome ? "away" : "home", label: "Поражение", description: "Соперник забирает результат" },
+  ];
+}
+
+function formatBarcaResult(result: PredictionChoice, match: Match) {
+  if (result === "draw") return "ничья";
+  const barcaWon = (match.home_team === "Барселона" && result === "home") || (match.away_team === "Барселона" && result === "away");
+  return barcaWon ? "победа" : "поражение";
 }

@@ -339,7 +339,7 @@ export function LineupSelector({
           const imageScale = Math.max((avatarRadius * 2) / image.naturalWidth, (avatarRadius * 2) / image.naturalHeight);
           const width = image.naturalWidth * imageScale;
           const height = image.naturalHeight * imageScale;
-          context.drawImage(image, x - width / 2, y - 18 - height / 2, width, height);
+          context.drawImage(image, x - width / 2, y - 18 - avatarRadius, width, height);
         } else {
           context.fillStyle = "#183a84";
           context.fillRect(x - avatarRadius, y - 18 - avatarRadius, avatarRadius * 2, avatarRadius * 2);
@@ -606,11 +606,15 @@ export function LineupSelector({
                     top: `${layout.y}%`,
                   }}
                 >
-                  <div
-                    className="lineup-player-avatar club-avatar h-14 w-14 rounded-full border-2 border-white/30 bg-cover bg-center shadow-[0_12px_28px_rgba(7,16,42,0.45)]"
-                    style={avatarPath ? { backgroundImage: `url(${avatarPath})` } : undefined}
-                  >
-                    {avatarPath ? null : getInitials(player.player_name)}
+                  <div className="lineup-player-avatar club-avatar h-14 w-14 overflow-hidden rounded-full border-2 border-white/30 shadow-[0_12px_28px_rgba(7,16,42,0.45)]">
+                    {avatarPath ? (
+                      <img
+                        src={avatarPath}
+                        alt=""
+                        draggable={false}
+                        className="h-full w-full select-none object-cover object-top"
+                      />
+                    ) : getInitials(player.player_name)}
                   </div>
                   <div className="mt-1.5 flex w-full flex-col items-center gap-1 rounded-2xl border border-white/10 bg-[#07152f]/86 px-2 py-1.5 shadow-[0_10px_28px_rgba(2,8,24,0.38)] backdrop-blur-sm">
                     <span className="max-w-[64px] truncate text-[10px] font-medium leading-none text-[#f1d1db]">

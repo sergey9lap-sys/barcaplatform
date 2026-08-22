@@ -31,7 +31,7 @@ export function ExplainYourTake({ targetType, targetId }: { targetType: Communit
       setIsAdmin(Boolean(ownProfile?.is_admin));
     }
     const { data, error } = await supabase.from("community_opinions").select("id,user_id,body,is_pinned,admin_reply,created_at,profiles(display_name),community_opinion_likes(user_id)").eq("target_type", targetType).eq("target_id", targetId).order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(40);
-    if (error || !data) { setMessage("Мнения станут доступны после применения миграции 0021."); setLoading(false); return; }
+    if (error || !data) { setLoading(false); return; }
     setOpinions(data.map((item) => { const profile = Array.isArray(item.profiles) ? item.profiles[0] : item.profiles; const likes = item.community_opinion_likes ?? []; return { id: item.id, userId: item.user_id, userName: profile?.display_name || "Кулес", text: item.body, likes: likes.length, liked: Boolean(user && likes.some((like: { user_id: string }) => like.user_id === user.id)), createdAt: relativeTime(item.created_at), isPinned: item.is_pinned, adminReply: item.admin_reply }; }));
     setLoading(false);
   }, [targetId, targetType]);

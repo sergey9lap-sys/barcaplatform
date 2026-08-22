@@ -14,7 +14,7 @@ alter table public.transfer_rumors
   add column if not exists community_votes integer;
 
 insert into public.players (player_name, avatar_url) values
-  ('Хави Эспарт', '/players/xavi-espart-avatar-2026.png'),
+  ('Хави Эспарт', '/players/xavi-espart-official-2026.jpg'),
   ('Альваро Кортес', '/la-masia/alvaro-cortes.jpg'),
   ('Жорди Пескер', '/la-masia/jordi-pesquer.jpg'),
   ('Эбрима Тункара', '/la-masia/ebrima-tunkara.jpg'),

@@ -39,7 +39,7 @@ const PLAYER_AVATARS: Record<string, string> = {
   "Виктор Гёкереш": playerAsset("виктор гёкереш.png"),
   "Маркус Рэшфорд": playerAsset("маркус рэшфорд.jpg"),
   "Руни Барджи": playerAsset("руни бардагжи.jpg"),
-  "Хави Эспарт": playerAsset("xavi-espart-avatar-2026.png"),
+  "Хави Эспарт": playerAsset("xavi-espart-official-2026.jpg"),
   "Альваро Кортес": "/la-masia/alvaro-cortes.jpg",
   "Жорди Пескер": "/la-masia/jordi-pesquer.jpg",
   "Эбрима Тункара": "/la-masia/ebrima-tunkara.jpg",

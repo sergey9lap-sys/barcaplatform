@@ -40,6 +40,14 @@ const PLAYER_AVATARS: Record<string, string> = {
   "Маркус Рэшфорд": playerAsset("маркус рэшфорд.jpg"),
   "Руни Барджи": playerAsset("руни бардагжи.jpg"),
   "Хави Эспарт": playerAsset("хави эспарт.jpg"),
+  "Альваро Кортес": "/la-masia/alvaro-cortes.jpg",
+  "Жорди Пескер": "/la-masia/jordi-pesquer.jpg",
+  "Эбрима Тункара": "/la-masia/ebrima-tunkara.jpg",
+  "Ориан Горен": "/la-masia/orian-goren.jpg",
+  "Брайан Фариньяс": "/la-masia/brian-farinas.jpg",
+  "Алекс Гонсалес": "/la-masia/alex-gonzalez.jpg",
+  "Икер Родригес": "/la-masia/iker-rodriguez.jpg",
+  "Хамза Абделькарим": "/la-masia/hamza-abdelkarim.jpg",
   "Ханси Флик": playerAsset("hansi-flick-2026.jpg"),
 };
 

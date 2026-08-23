@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Download, LayoutTemplate } from "lucide-react";
+import { Check, Download, LayoutTemplate, Plus } from "lucide-react";
 
 import { getPlayerAvatarPath } from "@/lib/assets";
 import { MOCK_LINEUP_USER_ID, getStoredLineupPrediction, saveStoredLineupPrediction } from "@/lib/lineup/storage";
@@ -473,7 +473,7 @@ export function LineupSelector({
         <CardTitle>Прогноз состава</CardTitle>
         <CardDescription>Выберите стартовые 11 игроков и расставьте их на поле.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         {backendEnabled && !userId ? (
           <div className="rounded-2xl border border-primary/20 bg-primary/10 p-4 text-sm text-white">
             Чтобы сохранять состав, сначала <Link className="underline" href="/auth">войдите в аккаунт</Link>.
@@ -486,7 +486,7 @@ export function LineupSelector({
           </div>
         ) : null}
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5">
           <p className="text-sm font-medium text-white">Выбрано {selectedCount} из 11</p>
           <p className="mt-1 text-sm text-muted-foreground">
             {selectedCount === 11
@@ -495,7 +495,7 @@ export function LineupSelector({
           </p>
         </div>
 
-        <div className="grid gap-2">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {selectablePlayers.map((player) => {
             const selected = selectedPlayerIds.includes(player.id);
             const avatarPath = getPlayerAvatarPath(player.player_name);
@@ -506,28 +506,31 @@ export function LineupSelector({
                 type="button"
                 onClick={() => togglePlayer(player.id)}
                 disabled={!isOpen && !selected}
+                aria-pressed={selected}
                 className={cn(
-                  "flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition-colors",
+                  "flex min-h-14 items-center justify-between rounded-xl border px-3 py-2 text-left transition-colors",
                   selected
                     ? "border-accent/50 bg-accent/15 text-white shadow-glow"
                     : "border-white/10 bg-white/[0.03] text-muted-foreground hover:border-white/20 hover:text-white",
                 )}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
                   <div
-                    className="club-avatar h-12 w-12 rounded-2xl bg-cover bg-center text-xs"
+                    className="club-avatar h-10 w-10 shrink-0 rounded-xl bg-cover bg-top text-[10px]"
                     style={avatarPath ? { backgroundImage: `url(${avatarPath})` } : undefined}
                   >
                     {avatarPath ? null : getInitials(player.player_name)}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold">{player.player_name}</p>
-                    <p className="meta-label mt-1 text-xs">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{player.player_name}</p>
+                    <p className="meta-label mt-0.5 truncate text-[10px]">
                       {formatPlayerPosition(player.position)} {player.player_number ? `#${player.player_number}` : ""}
                     </p>
                   </div>
                 </div>
-                <span className="meta-label text-xs">{selected ? "В поле" : "Добавить"}</span>
+                <span className={cn("ml-2 grid h-7 w-7 shrink-0 place-items-center rounded-lg", selected ? "bg-accent/25 text-rose-100" : "bg-white/[0.05] text-blue-100/65")} aria-hidden="true">
+                  {selected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                </span>
               </button>
             );
           })}

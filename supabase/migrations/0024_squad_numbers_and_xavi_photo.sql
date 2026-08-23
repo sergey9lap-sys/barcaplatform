@@ -10,7 +10,11 @@ set player_number = case player_name
   when 'Энтони Гордон' then 17
   when 'Карим Адейеми' then 14
   when 'Джесси Бисиву' then 27
-  when 'Хави Эспарт' then 28
+  when 'Хави Эспарт' then 36
+  when 'Альваро Кортес' then 26
+  when 'Брайан Фариньяс' then 28
+  when 'Хамза Абделькарим' then 29
+  when 'Жорди Пескер' then 33
   when 'Фермин Лопес' then 7
   when 'Родри' then 16
   else player_number
@@ -20,6 +24,10 @@ where player_name in (
   'Карим Адейеми',
   'Джесси Бисиву',
   'Хави Эспарт',
+  'Альваро Кортес',
+  'Брайан Фариньяс',
+  'Хамза Абделькарим',
+  'Жорди Пескер',
   'Фермин Лопес',
   'Родри'
 );

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { getPlayerAvatarPath } from "@/lib/assets";
@@ -45,6 +46,27 @@ function moveItem<T>(items: T[], fromIndex: number, toIndex: number) {
   return next;
 }
 
+function loadRankingImage(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`Не удалось загрузить изображение: ${src}`));
+    image.src = src;
+  });
+}
+
+function roundedRect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+  context.beginPath();
+  context.roundRect(x, y, width, height, radius);
+}
+
+function fitCanvasText(context: CanvasRenderingContext2D, value: string, maxWidth: number) {
+  if (context.measureText(value).width <= maxWidth) return value;
+  let text = value;
+  while (text.length > 1 && context.measureText(`${text}…`).width > maxWidth) text = text.slice(0, -1);
+  return `${text}…`;
+}
+
 export function PlayerRankings({
   match,
   players,
@@ -60,6 +82,7 @@ export function PlayerRankings({
   const [viewMode, setViewMode] = useState<"table" | "cards">("table");
   const [draggedPlayerId, setDraggedPlayerId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [exportingImage, setExportingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -322,6 +345,148 @@ export function PlayerRankings({
     setSuccess("Порядок игроков сохранён.");
   }
 
+  async function downloadRankingImage() {
+    if (orderedPlayers.length !== MAX_MATCH_RANKINGS) {
+      setError("Сначала заполните все 16 мест рейтинга.");
+      return;
+    }
+
+    setError(null);
+    setExportingImage(true);
+
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Не удалось подготовить изображение рейтинга.");
+
+      const background = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+      background.addColorStop(0, "#07122f");
+      background.addColorStop(0.52, "#0b1739");
+      background.addColorStop(1, "#3a0b28");
+      context.fillStyle = background;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      const glowBlue = context.createRadialGradient(160, 110, 10, 160, 110, 470);
+      glowBlue.addColorStop(0, "rgba(45, 104, 255, 0.34)");
+      glowBlue.addColorStop(1, "rgba(45, 104, 255, 0)");
+      context.fillStyle = glowBlue;
+      context.fillRect(0, 0, canvas.width, 650);
+      const glowGarnet = context.createRadialGradient(930, 1220, 10, 930, 1220, 480);
+      glowGarnet.addColorStop(0, "rgba(190, 25, 86, 0.34)");
+      glowGarnet.addColorStop(1, "rgba(190, 25, 86, 0)");
+      context.fillStyle = glowGarnet;
+      context.fillRect(500, 760, 580, 590);
+
+      context.fillStyle = "#f2c85b";
+      context.font = '700 22px "Segoe UI", sans-serif';
+      context.fillText("BARÇA HUB · ВЫБОР БОЛЕЛЬЩИКА", 64, 70);
+      context.fillStyle = "#ffffff";
+      context.font = '700 48px "Segoe UI", sans-serif';
+      context.fillText("МОЙ РЕЙТИНГ ИГРОКОВ", 64, 132);
+      context.fillStyle = "rgba(221, 229, 255, 0.74)";
+      context.font = '500 25px "Segoe UI", sans-serif';
+      context.fillText(`${match.home_team} — ${match.away_team}`, 64, 178);
+      context.font = '500 20px "Segoe UI", sans-serif';
+      context.fillText(new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(new Date(match.kickoff_at)), 64, 214);
+
+      const imageEntries = await Promise.all(orderedPlayers.map(async (player) => {
+        const path = getPlayerAvatarPath(player.player_name);
+        if (!path) return { player, image: null };
+        try { return { player, image: await loadRankingImage(path) }; } catch { return { player, image: null }; }
+      }));
+
+      imageEntries.forEach(({ player, image }, index) => {
+        const column = index < 8 ? 0 : 1;
+        const row = index % 8;
+        const x = column === 0 ? 54 : 550;
+        const y = 258 + row * 125;
+        const width = 476;
+        const height = 106;
+
+        roundedRect(context, x, y, width, height, 20);
+        context.fillStyle = index < 3 ? "rgba(35, 65, 140, 0.74)" : "rgba(8, 19, 49, 0.78)";
+        context.fill();
+        context.strokeStyle = index < 3 ? "rgba(238, 77, 130, 0.46)" : "rgba(164, 184, 239, 0.16)";
+        context.lineWidth = 2;
+        context.stroke();
+
+        roundedRect(context, x + 14, y + 17, 58, 72, 16);
+        const rankFill = context.createLinearGradient(x + 14, y + 17, x + 72, y + 89);
+        rankFill.addColorStop(0, "#275dcc");
+        rankFill.addColorStop(1, "#9b194c");
+        context.fillStyle = rankFill;
+        context.fill();
+        context.fillStyle = "#ffffff";
+        context.font = '700 30px "Segoe UI", sans-serif';
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(String(index + 1), x + 43, y + 53);
+
+        const avatarX = x + 113;
+        const avatarY = y + 53;
+        const radius = 35;
+        context.save();
+        context.beginPath();
+        context.arc(avatarX, avatarY, radius, 0, Math.PI * 2);
+        context.clip();
+        if (image) {
+          const scale = Math.max((radius * 2) / image.naturalWidth, (radius * 2) / image.naturalHeight);
+          const renderedWidth = image.naturalWidth * scale;
+          const renderedHeight = image.naturalHeight * scale;
+          context.drawImage(image, avatarX - renderedWidth / 2, avatarY - radius, renderedWidth, renderedHeight);
+        } else {
+          context.fillStyle = "#183a84";
+          context.fillRect(avatarX - radius, avatarY - radius, radius * 2, radius * 2);
+          context.fillStyle = "#ffffff";
+          context.font = '700 20px "Segoe UI", sans-serif';
+          context.textAlign = "center";
+          context.textBaseline = "middle";
+          context.fillText(getInitials(player.player_name), avatarX, avatarY);
+        }
+        context.restore();
+        context.beginPath();
+        context.arc(avatarX, avatarY, radius, 0, Math.PI * 2);
+        context.strokeStyle = "rgba(255,255,255,0.3)";
+        context.lineWidth = 2;
+        context.stroke();
+
+        context.textAlign = "left";
+        context.textBaseline = "alphabetic";
+        context.fillStyle = "#ffffff";
+        context.font = '700 22px "Segoe UI", sans-serif';
+        context.fillText(fitCanvasText(context, player.player_name, 260), x + 162, y + 47);
+        context.fillStyle = "rgba(218, 228, 255, 0.68)";
+        context.font = '600 16px "Segoe UI", sans-serif';
+        const detail = `${formatPlayerPosition(player.position)}${player.player_number ? ` · №${player.player_number}` : ""}`;
+        context.fillText(fitCanvasText(context, detail, 260), x + 162, y + 75);
+      });
+
+      context.textAlign = "left";
+      context.fillStyle = "rgba(221, 229, 255, 0.62)";
+      context.font = '600 18px "Segoe UI", sans-serif';
+      context.fillText("1 место — лучший игрок матча · 16 место — наименьшее влияние", 64, 1303);
+      context.textAlign = "right";
+      context.fillStyle = "#f2c85b";
+      context.fillText("barcaplatform", 1016, 1303);
+
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Не удалось сохранить изображение рейтинга.");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `barca-player-ranking-${match.id}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setSuccess("Карточка рейтинга скачана.");
+    } catch {
+      setError("Не удалось создать карточку рейтинга. Попробуйте ещё раз.");
+    } finally {
+      setExportingImage(false);
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -497,20 +662,31 @@ export function PlayerRankings({
         {error ? <p className="ui-status-error text-sm">{error}</p> : null}
         {success ? <p className="ui-status-success text-sm">{success}</p> : null}
 
-        <Button
-          className="w-full"
-          variant="secondary"
-          onClick={handleSave}
-          disabled={
-            saving ||
-            !rankingAvailable ||
-            playedMatchPlayers.length !== MAX_MATCH_RANKINGS ||
-            orderedPlayers.length !== MAX_MATCH_RANKINGS ||
-            (backendEnabled && !currentUserId)
-          }
-        >
-          {saving ? "Сохраняем порядок..." : "Сохранить порядок игроков"}
-        </Button>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={handleSave}
+            disabled={
+              saving ||
+              !rankingAvailable ||
+              playedMatchPlayers.length !== MAX_MATCH_RANKINGS ||
+              orderedPlayers.length !== MAX_MATCH_RANKINGS ||
+              (backendEnabled && !currentUserId)
+            }
+          >
+            {saving ? "Сохраняем порядок..." : "Сохранить порядок игроков"}
+          </Button>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => void downloadRankingImage()}
+            disabled={exportingImage || orderedPlayers.length !== MAX_MATCH_RANKINGS}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            {exportingImage ? "Создаём карточку..." : "Скачать карточку рейтинга"}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

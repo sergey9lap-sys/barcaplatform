@@ -352,9 +352,13 @@ export function PlayerRankings({
     }
 
     setError(null);
+    setSuccess(null);
     setExportingImage(true);
 
     try {
+      // Freeze the exact order visible at the moment of the click. Image loading is
+      // asynchronous, so the export must not depend on a later render or saved data.
+      const rankingSnapshot = [...orderedPlayers];
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1350;
@@ -391,15 +395,16 @@ export function PlayerRankings({
       context.font = '500 20px "Segoe UI", sans-serif';
       context.fillText(new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(new Date(match.kickoff_at)), 64, 214);
 
-      const imageEntries = await Promise.all(orderedPlayers.map(async (player) => {
+      const imageEntries = await Promise.all(rankingSnapshot.map(async (player) => {
         const path = getPlayerAvatarPath(player.player_name);
         if (!path) return { player, image: null };
         try { return { player, image: await loadRankingImage(path) }; } catch { return { player, image: null }; }
       }));
 
       imageEntries.forEach(({ player, image }, index) => {
-        const column = index < 8 ? 0 : 1;
-        const row = index % 8;
+        // Match the on-screen order: 1–2 on the first row, 3–4 on the second, etc.
+        const column = index % 2;
+        const row = Math.floor(index / 2);
         const x = column === 0 ? 54 : 550;
         const y = 258 + row * 125;
         const width = 476;
@@ -476,10 +481,10 @@ export function PlayerRankings({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `barca-player-ranking-${match.id}.png`;
+      link.download = `barca-player-ranking-${match.id}-${Date.now()}.png`;
       link.click();
-      URL.revokeObjectURL(url);
-      setSuccess("Карточка рейтинга скачана.");
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      setSuccess("Карточка текущего рейтинга скачана.");
     } catch {
       setError("Не удалось создать карточку рейтинга. Попробуйте ещё раз.");
     } finally {
@@ -544,28 +549,45 @@ export function PlayerRankings({
                 <div className="grid gap-2 md:grid-cols-2">
                   {orderedPlayers.map((player, index) => {
                     const points = getSeasonPointsFromRank(index + 1);
+                    const avatarPath = getPlayerAvatarPath(player.player_name);
 
                     return (
                       <div
                         key={`slot-${index + 1}`}
                         className="rounded-2xl border border-white/10 bg-white/[0.03] p-3"
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <div>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="shrink-0">
                             <p className="meta-label text-[10px]">Место {index + 1}</p>
                             <p className="ui-value mt-1 text-sm">{points} очков за матч</p>
                           </div>
-                          <select
-                            value={player.id}
-                            onChange={(event) => handleAssignRankBySlot(index, event.target.value)}
-                            className="min-w-[180px] rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[#f1d1db] outline-none transition focus:border-primary/40"
-                          >
-                            {playedMatchPlayers.map((optionPlayer) => (
-                              <option key={optionPlayer.id} value={optionPlayer.id}>
-                                {optionPlayer.player_name}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/15 bg-[#0a1738] p-1.5 transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15 sm:w-[250px]">
+                            <div
+                              className="club-avatar h-9 w-9 shrink-0 rounded-lg bg-cover bg-top text-[10px]"
+                              style={avatarPath ? { backgroundImage: `url(${avatarPath})` } : undefined}
+                              aria-hidden="true"
+                            >
+                              {avatarPath ? null : getInitials(player.player_name)}
+                            </div>
+                            <select
+                              aria-label={`Игрок на ${index + 1} месте`}
+                              value={player.id}
+                              onChange={(event) => handleAssignRankBySlot(index, event.target.value)}
+                              className="min-w-0 flex-1 cursor-pointer bg-transparent px-1 py-2 text-sm font-semibold text-white outline-none"
+                              style={{ colorScheme: "dark" }}
+                            >
+                              {playedMatchPlayers.map((optionPlayer) => (
+                                <option
+                                  key={optionPlayer.id}
+                                  value={optionPlayer.id}
+                                  className="bg-[#081535] text-white"
+                                  style={{ backgroundColor: "#081535", color: "#ffffff" }}
+                                >
+                                  {optionPlayer.player_name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
                       </div>
                     );

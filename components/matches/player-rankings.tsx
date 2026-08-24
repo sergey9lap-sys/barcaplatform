@@ -402,9 +402,9 @@ export function PlayerRankings({
       }));
 
       imageEntries.forEach(({ player, image }, index) => {
-        // Match the on-screen order: 1–2 on the first row, 3–4 on the second, etc.
-        const column = index % 2;
-        const row = Math.floor(index / 2);
+        // Read down each column: places 1–8 on the left, 9–16 on the right.
+        const column = index < 8 ? 0 : 1;
+        const row = index % 8;
         const x = column === 0 ? 54 : 550;
         const y = 258 + row * 125;
         const width = 476;
@@ -546,7 +546,7 @@ export function PlayerRankings({
 
             {viewMode === "table" ? (
               <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="grid gap-2 md:grid-cols-2">
+                <div className="grid gap-2 md:grid-flow-col md:grid-cols-2 md:grid-rows-8">
                   {orderedPlayers.map((player, index) => {
                     const points = getSeasonPointsFromRank(index + 1);
                     const avatarPath = getPlayerAvatarPath(player.player_name);

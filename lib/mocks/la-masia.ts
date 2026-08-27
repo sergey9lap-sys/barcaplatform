@@ -8,12 +8,6 @@ export const mockLaMasiaPlayers: LaMasiaPlayerRecord[] = [
     short_description: "Гибридный профиль для правого фланга и центра: умно занимает пространство, спокойно работает с мячом и уже выдерживает темп первой команды.", priority: 100,
   },
   {
-    id: "alvaro-cortes", name: "Альваро Кортес", age: 21, position: "Центральный защитник",
-    image_url: "/la-masia/alvaro-cortes.jpg", team_level: "Barca Atletic", potential_score: 84,
-    first_team_chance: 79, coach_system_fit_score: 86, barca_fit_score: 88, status: "first_team_candidate",
-    short_description: "Левоногий центральный защитник с хорошим первым пасом, игрой на опережение и физикой для взрослого футбола.", priority: 90,
-  },
-  {
     id: "jordi-pesquer", name: "Жорди Пескер", age: 17, position: "Левый защитник",
     image_url: "/la-masia/jordi-pesquer.jpg", team_level: "U19", potential_score: 90,
     first_team_chance: 72, coach_system_fit_score: 87, barca_fit_score: 91, status: "preseason",

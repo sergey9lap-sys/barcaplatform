@@ -7,7 +7,6 @@ import { mockMatchPlayers } from "@/lib/mocks/match-players";
 import { mockMatchPlayedPlayers } from "@/lib/mocks/match-played-players";
 import { mockLeagueStandings } from "@/lib/mocks/league-standings";
 import { mockPlayerRankings } from "@/lib/mocks/player-rankings";
-import { mockManualPlayerSeasonStatsWithUsefulness } from "@/lib/mocks/player-season-stats";
 import { mockTransferRumors } from "@/lib/mocks/transfer-rumors";
 import { mockTransferIdeas } from "@/lib/mocks/transfer-ideas";
 import { mockLaMasiaPlayers } from "@/lib/mocks/la-masia";
@@ -59,6 +58,8 @@ function mergeSeasonStats(
       existing.player_name = manual.player_name ?? existing.player_name;
       existing.goals = manual.goals;
       existing.assists = manual.assists;
+      existing.pre_assists = manual.pre_assists;
+      existing.goal_influences = manual.goal_influences;
       existing.matches_played = manual.matches_played;
       existing.minutes_played = manual.minutes_played;
       existing.avatar_url = manual.avatar_url;
@@ -82,6 +83,8 @@ function mergeSeasonStats(
       last_place_count: manual.last_place_count_override ?? 0,
       goals: manual.goals,
       assists: manual.assists,
+      pre_assists: manual.pre_assists,
+      goal_influences: manual.goal_influences,
       matches_played: manual.matches_played,
       minutes_played: manual.minutes_played,
       avatar_url: manual.avatar_url,
@@ -746,12 +749,13 @@ export async function getAllPlayerRankingsForUser(userId?: string) {
 }
 
 export async function getSeasonPlayerStats() {
+  const currentSeasonLabel = "2026-27";
   noStore();
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
     return mergeSeasonStats(
       buildSeasonPlayerStats(mockPlayerRankings, mockMatchPlayers),
-      mockManualPlayerSeasonStatsWithUsefulness,
+      [],
       mockMatchPlayers,
     );
   }
@@ -760,29 +764,46 @@ export async function getSeasonPlayerStats() {
     { data: rankings, error: rankingsError },
     { data: matchPlayers, error: playersError },
     { data: manualStats, error: manualStatsError },
+    { data: seasonMatches, error: matchesError },
   ] = await Promise.all([
     supabase.from("player_rankings").select("*"),
     supabase.from("match_players").select("*"),
     supabase.from("season_player_stats").select("*"),
+    supabase.from("matches").select("id,kickoff_at"),
   ]);
 
-  if (rankingsError || playersError || manualStatsError) {
+  if (rankingsError || playersError || manualStatsError || matchesError) {
     return mergeSeasonStats(
       buildSeasonPlayerStats(mockPlayerRankings, mockMatchPlayers),
-      mockManualPlayerSeasonStatsWithUsefulness,
+      [],
       mockMatchPlayers,
     );
   }
 
-  const manualStatsList = (manualStats as ManualPlayerSeasonStat[] | null) ?? [];
+  const manualStatsList = ((manualStats as ManualPlayerSeasonStat[] | null) ?? [])
+    .filter((item) => item.season_label === currentSeasonLabel);
+  const seasonMatchIds = new Set(
+    (((seasonMatches as Pick<Match, "id" | "kickoff_at">[] | null) ?? []))
+      .filter((match) => {
+        const kickoff = new Date(match.kickoff_at);
+        const year = kickoff.getUTCFullYear();
+        const seasonStart = kickoff.getUTCMonth() >= 6 ? year : year - 1;
+        return `${seasonStart}-${String((seasonStart + 1) % 100).padStart(2, "0")}` === currentSeasonLabel;
+      })
+      .map((match) => match.id),
+  );
+  const seasonMatchPlayers = ((matchPlayers as MatchPlayer[] | null) ?? [])
+    .filter((player) => seasonMatchIds.has(player.match_id));
+  const seasonRankings = ((rankings as PlayerRankingRecord[] | null) ?? [])
+    .filter((ranking) => seasonMatchIds.has(ranking.match_id));
 
   return mergeSeasonStats(
     buildSeasonPlayerStats(
-    (rankings as PlayerRankingRecord[] | null) ?? [],
-    (matchPlayers as MatchPlayer[] | null) ?? [],
+    seasonRankings,
+    seasonMatchPlayers,
     ),
-    manualStatsList.length ? manualStatsList : mockManualPlayerSeasonStatsWithUsefulness,
-    (matchPlayers as MatchPlayer[] | null) ?? [],
+    manualStatsList,
+    seasonMatchPlayers,
   ) as SeasonPlayerStat[];
 }
 

@@ -61,6 +61,8 @@ export function buildSeasonPlayerStats(
         last_place_count: ranking.rank_position === MAX_MATCH_RANKINGS ? 1 : 0,
         goals: 0,
         assists: 0,
+        pre_assists: 0,
+        goal_influences: 0,
         matches_played: 0,
         minutes_played: 0,
         avatar_url: null,

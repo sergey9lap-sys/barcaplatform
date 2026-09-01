@@ -85,6 +85,8 @@ export interface MatchPlayerStat {
   match_player_id: string;
   goals: number;
   assists: number;
+  pre_assists: number;
+  goal_influences: number;
   created_at: string;
   updated_at: string;
 }
@@ -520,6 +522,8 @@ export interface SeasonPlayerStat {
   last_place_count: number;
   goals: number;
   assists: number;
+  pre_assists: number;
+  goal_influences: number;
   matches_played: number;
   minutes_played: number;
   avatar_url: string | null;
@@ -553,6 +557,8 @@ export interface ManualPlayerSeasonStat {
   season_label: string;
   goals: number;
   assists: number;
+  pre_assists: number;
+  goal_influences: number;
   matches_played: number;
   minutes_played: number;
   total_points_override?: number;

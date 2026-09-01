@@ -27,7 +27,7 @@ import type {
 
 function getSeasonLabelFromKickoff(kickoffAt?: string | null) {
   if (!kickoffAt) {
-    return "2025-26";
+    return "2026-27";
   }
 
   const kickoffDate = new Date(kickoffAt);
@@ -100,9 +100,11 @@ export function AdminDashboard({
   });
   const [seasonStatForm, setSeasonStatForm] = useState({
     player_id: players[0]?.id ?? "",
-    season_label: "2025-26",
+    season_label: "2026-27",
     goals: "0",
     assists: "0",
+    pre_assists: "0",
+    goal_influences: "0",
     matches_played: "0",
     minutes_played: "0",
     avatar_url: "",
@@ -116,8 +118,8 @@ export function AdminDashboard({
     home_score: "",
     away_score: "",
   });
-  const [matchStatsSeasonLabel, setMatchStatsSeasonLabel] = useState("2025-26");
-  const [matchPlayerStatForm, setMatchPlayerStatForm] = useState<Record<string, { goals: string; assists: string }>>({});
+  const [matchStatsSeasonLabel, setMatchStatsSeasonLabel] = useState("2026-27");
+  const [matchPlayerStatForm, setMatchPlayerStatForm] = useState<Record<string, { goals: string; assists: string; pre_assists: string; goal_influences: string }>>({});
 
   const seasonStatsByPlayerId = useMemo(
     () => new Map(seasonStats.map((item) => [item.player_id, item])),
@@ -213,6 +215,8 @@ export function AdminDashboard({
           {
             goals: String(current?.goals ?? 0),
             assists: String(current?.assists ?? 0),
+            pre_assists: String(current?.pre_assists ?? 0),
+            goal_influences: String(current?.goal_influences ?? 0),
           },
         ];
       }),
@@ -307,7 +311,7 @@ export function AdminDashboard({
     const currentSeasonStatsByPlayerId = new Map(
       ((currentSeasonStats as SeasonPlayerStat[] | null) ?? []).map((item) => [item.player_id, item]),
     );
-    const aggregatedGoalsAndAssistsByPlayerId = new Map<string, { goals: number; assists: number }>();
+    const aggregatedGoalActionsByPlayerId = new Map<string, { goals: number; assists: number; pre_assists: number; goal_influences: number }>();
     const matchesPlayedByPlayerId = new Map<string, number>();
 
     nextMatchStats.forEach((item) => {
@@ -320,10 +324,12 @@ export function AdminDashboard({
         return;
       }
 
-      const current = aggregatedGoalsAndAssistsByPlayerId.get(matchPlayer.player_id) ?? { goals: 0, assists: 0 };
+      const current = aggregatedGoalActionsByPlayerId.get(matchPlayer.player_id) ?? { goals: 0, assists: 0, pre_assists: 0, goal_influences: 0 };
       current.goals += item.goals;
       current.assists += item.assists;
-      aggregatedGoalsAndAssistsByPlayerId.set(matchPlayer.player_id, current);
+      current.pre_assists += item.pre_assists;
+      current.goal_influences += item.goal_influences;
+      aggregatedGoalActionsByPlayerId.set(matchPlayer.player_id, current);
     });
 
     nextPlayedPlayers.forEach((item) => {
@@ -340,7 +346,7 @@ export function AdminDashboard({
     });
 
     for (const playerId of playerIds) {
-      const aggregated = aggregatedGoalsAndAssistsByPlayerId.get(playerId) ?? { goals: 0, assists: 0 };
+      const aggregated = aggregatedGoalActionsByPlayerId.get(playerId) ?? { goals: 0, assists: 0, pre_assists: 0, goal_influences: 0 };
       const currentStat = currentSeasonStatsByPlayerId.get(playerId) ?? seasonStatsByPlayerId.get(playerId);
       const { error: statError } = await supabase.from("season_player_stats").upsert(
         {
@@ -348,6 +354,8 @@ export function AdminDashboard({
           season_label: seasonLabel,
           goals: aggregated.goals,
           assists: aggregated.assists,
+          pre_assists: aggregated.pre_assists,
+          goal_influences: aggregated.goal_influences,
           matches_played: matchesPlayedByPlayerId.get(playerId) ?? 0,
           minutes_played: currentStat?.minutes_played ?? 0,
           avatar_url: currentStat?.avatar_url ?? null,
@@ -504,7 +512,9 @@ export function AdminDashboard({
         const stat = matchPlayerStatForm[player.id];
         const goals = Number(stat?.goals ?? 0);
         const assists = Number(stat?.assists ?? 0);
-        return (goals > 0 || assists > 0) && !player.player_id;
+        const preAssists = Number(stat?.pre_assists ?? 0);
+        const goalInfluences = Number(stat?.goal_influences ?? 0);
+        return (goals > 0 || assists > 0 || preAssists > 0 || goalInfluences > 0) && !player.player_id;
       })
       .map((player) => player.player_name);
 
@@ -519,15 +529,19 @@ export function AdminDashboard({
         const stat = matchPlayerStatForm[player.id];
         const goals = Math.max(0, Number(stat?.goals ?? 0));
         const assists = Math.max(0, Number(stat?.assists ?? 0));
+        const pre_assists = Math.max(0, Number(stat?.pre_assists ?? 0));
+        const goal_influences = Math.max(0, Number(stat?.goal_influences ?? 0));
 
         return {
           match_id: selectedMatchId,
           match_player_id: player.id,
           goals,
           assists,
+          pre_assists,
+          goal_influences,
         };
       })
-      .filter((item) => item.goals > 0 || item.assists > 0);
+      .filter((item) => item.goals > 0 || item.assists > 0 || item.pre_assists > 0 || item.goal_influences > 0);
 
     const { error: deleteError } = await supabase.from("match_player_stats").delete().eq("match_id", selectedMatchId);
     if (deleteError) {
@@ -554,6 +568,8 @@ export function AdminDashboard({
         match_player_id: item.match_player_id,
         goals: item.goals,
         assists: item.assists,
+        pre_assists: item.pre_assists,
+        goal_influences: item.goal_influences,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })),
@@ -580,7 +596,7 @@ export function AdminDashboard({
       return;
     }
 
-    setMessage("Голы, ассисты и матчи в общей статистике игроков пересчитаны автоматически.");
+    setMessage("Все голевые действия и матчи в общей статистике игроков пересчитаны автоматически.");
     setSavingSection(null);
     router.refresh();
   }
@@ -693,6 +709,8 @@ export function AdminDashboard({
         season_label: seasonStatForm.season_label,
         goals: Number(seasonStatForm.goals),
         assists: Number(seasonStatForm.assists),
+        pre_assists: Number(seasonStatForm.pre_assists),
+        goal_influences: Number(seasonStatForm.goal_influences),
         matches_played: Number(seasonStatForm.matches_played),
         minutes_played: Number(seasonStatForm.minutes_played),
         avatar_url: seasonStatForm.avatar_url || null,
@@ -804,9 +822,9 @@ export function AdminDashboard({
             <div className="soft-panel space-y-4 px-4 py-4">
               <div>
                 <p className="meta-label text-xs">События матча</p>
-                <h4 className="ui-value mt-2 text-lg font-semibold">Кто забил и кто отдал голевую</h4>
+                <h4 className="ui-value mt-2 text-lg font-semibold">Все действия, повлиявшие на гол</h4>
                 <p className="ui-note mt-2 text-sm">
-                  Внесите голы и ассисты по игрокам для выбранного матча. После сохранения эти значения попадут в общую сезонную статистику игроков.
+                  Внесите голы, голевые, предголевые и ключевое участие без официального ассиста. После сохранения всё попадёт в статистику сезона.
                 </p>
               </div>
 
@@ -825,10 +843,10 @@ export function AdminDashboard({
               <div className="space-y-3">
                 <div className="space-y-2">
                   {selectedMatchPlayers.map((player) => {
-                    const stat = matchPlayerStatForm[player.id] ?? { goals: "0", assists: "0" };
+                    const stat = matchPlayerStatForm[player.id] ?? { goals: "0", assists: "0", pre_assists: "0", goal_influences: "0" };
 
                     return (
-                      <div key={player.id} className="soft-panel grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_120px_120px] sm:items-center">
+                      <div key={player.id} className="soft-panel grid gap-3 px-4 py-3 md:grid-cols-[minmax(180px,1fr)_100px_100px_120px_150px] md:items-center">
                         <div>
                           <p className="ui-value font-semibold">
                             {player.player_name}
@@ -851,6 +869,31 @@ export function AdminDashboard({
                         <input
                           className="form-control"
                           inputMode="numeric"
+                          placeholder="Предголевые"
+                          value={stat.pre_assists}
+                          onChange={(e) =>
+                            setMatchPlayerStatForm((current) => ({
+                              ...current,
+                              [player.id]: { ...current[player.id], pre_assists: e.target.value },
+                            }))
+                          }
+                        />
+                        <input
+                          className="form-control"
+                          inputMode="numeric"
+                          placeholder="Влияние на гол"
+                          title="Ключевое действие без официального гола или голевой передачи"
+                          value={stat.goal_influences}
+                          onChange={(e) =>
+                            setMatchPlayerStatForm((current) => ({
+                              ...current,
+                              [player.id]: { ...current[player.id], goal_influences: e.target.value },
+                            }))
+                          }
+                        />
+                        <input
+                          className="form-control"
+                          inputMode="numeric"
                           placeholder="Пасы"
                           value={stat.assists}
                           onChange={(e) =>
@@ -866,7 +909,7 @@ export function AdminDashboard({
                 </div>
 
                 <Button type="button" className="w-full" variant="secondary" onClick={() => void saveMatchPlayerStats()} disabled={savingSection === "match-player-stats"}>
-                  {savingSection === "match-player-stats" ? "Сохраняем голы и ассисты..." : "Сохранить голы и ассисты по матчу"}
+                  {savingSection === "match-player-stats" ? "Сохраняем действия..." : "Сохранить голевые действия по матчу"}
                 </Button>
               </div>
             </div>
@@ -1084,9 +1127,11 @@ export function AdminDashboard({
                   const currentStat = seasonStatsByPlayerId.get(nextId);
                   setSeasonStatForm({
                     player_id: nextId,
-                    season_label: currentStat ? "2025-26" : "2025-26",
+                    season_label: "2026-27",
                     goals: String(currentStat?.goals ?? 0),
                     assists: String(currentStat?.assists ?? 0),
+                    pre_assists: String(currentStat?.pre_assists ?? 0),
+                    goal_influences: String(currentStat?.goal_influences ?? 0),
                     matches_played: String(currentStat?.matches_played ?? 0),
                     minutes_played: String(currentStat?.minutes_played ?? 0),
                     avatar_url: currentStat?.avatar_url ?? "",
@@ -1100,6 +1145,8 @@ export function AdminDashboard({
               <input className="form-control" placeholder="Сезон" value={seasonStatForm.season_label} onChange={(e) => setSeasonStatForm((c) => ({ ...c, season_label: e.target.value }))} />
               <input className="form-control" placeholder="Голы" value={seasonStatForm.goals} onChange={(e) => setSeasonStatForm((c) => ({ ...c, goals: e.target.value }))} />
               <input className="form-control" placeholder="Пасы" value={seasonStatForm.assists} onChange={(e) => setSeasonStatForm((c) => ({ ...c, assists: e.target.value }))} />
+              <input className="form-control" placeholder="Предголевые" value={seasonStatForm.pre_assists} onChange={(e) => setSeasonStatForm((c) => ({ ...c, pre_assists: e.target.value }))} />
+              <input className="form-control" placeholder="Ключевое участие в голе" value={seasonStatForm.goal_influences} onChange={(e) => setSeasonStatForm((c) => ({ ...c, goal_influences: e.target.value }))} />
               <input className="form-control" placeholder="Матчи" value={seasonStatForm.matches_played} onChange={(e) => setSeasonStatForm((c) => ({ ...c, matches_played: e.target.value }))} />
               <input className="form-control" placeholder="Минуты" value={seasonStatForm.minutes_played} onChange={(e) => setSeasonStatForm((c) => ({ ...c, minutes_played: e.target.value }))} />
             </div>
@@ -1115,9 +1162,11 @@ export function AdminDashboard({
                 type="button"
                 onClick={() => setSeasonStatForm({
                   player_id: item.player_id,
-                  season_label: "2025-26",
+                  season_label: "2026-27",
                   goals: String(item.goals),
                   assists: String(item.assists),
+                  pre_assists: String(item.pre_assists),
+                  goal_influences: String(item.goal_influences),
                   matches_played: String(item.matches_played),
                   minutes_played: String(item.minutes_played),
                   avatar_url: item.avatar_url ?? "",
@@ -1126,7 +1175,7 @@ export function AdminDashboard({
               >
                 <div>
                   <p className="ui-value font-semibold">{item.player_name}</p>
-                  <p className="ui-note mt-1 text-xs">Голы: {item.goals} · Пасы: {item.assists} · Матчи: {item.matches_played} · Минуты: {item.minutes_played}</p>
+                  <p className="ui-note mt-1 text-xs">Голы: {item.goals} · Пасы: {item.assists} · Предголевые: {item.pre_assists} · Влияние: {item.goal_influences} · Матчи: {item.matches_played}</p>
                 </div>
                 <span className="ui-note text-xs">Редактировать</span>
               </button>

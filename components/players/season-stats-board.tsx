@@ -24,6 +24,26 @@ function fitText(context: CanvasRenderingContext2D, value: string, maxWidth: num
   return `${text}…`;
 }
 
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+}
+
+function loadCanvasImage(source: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    const resolvedUrl = new URL(source, window.location.origin);
+    if (resolvedUrl.origin !== window.location.origin) image.crossOrigin = "anonymous";
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = resolvedUrl.href;
+  });
+}
+
 async function downloadSeasonCard(stats: SeasonPlayerStat[]) {
   await document.fonts.ready;
   const canvas = document.createElement("canvas");
@@ -55,6 +75,13 @@ async function downloadSeasonCard(stats: SeasonPlayerStat[]) {
   context.font = '600 21px "Segoe UI", sans-serif';
   context.fillText("Голосование болельщиков по завершённым матчам", 56, 184);
 
+  const avatars = await Promise.all(
+    stats.map(async (player) => {
+      const source = getPlayerAvatarPath(player.player_name, player.avatar_url);
+      if (!source) return null;
+      try { return await loadCanvasImage(source); } catch { return null; }
+    }),
+  );
   const rowsPerColumn = Math.ceil(stats.length / 2);
   const rowHeight = Math.min(112, Math.floor(1490 / Math.max(1, rowsPerColumn)));
   stats.forEach((player, index) => {
@@ -83,13 +110,42 @@ async function downloadSeasonCard(stats: SeasonPlayerStat[]) {
     context.font = '800 26px "Segoe UI", sans-serif';
     context.fillText(String(index + 1), x + 43, y + height / 2 + 9);
 
+    const avatar = avatars[index];
+    const avatarRadius = Math.min(30, height / 2 - 11);
+    const avatarX = x + 108;
+    const avatarY = y + height / 2;
+    context.save();
+    context.beginPath();
+    context.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
+    context.clip();
+    context.fillStyle = "#132956";
+    context.fillRect(avatarX - avatarRadius, avatarY - avatarRadius, avatarRadius * 2, avatarRadius * 2);
+    if (avatar) {
+      const diameter = avatarRadius * 2;
+      const scale = Math.max(diameter / avatar.naturalWidth, diameter / avatar.naturalHeight);
+      const imageWidth = avatar.naturalWidth * scale;
+      const imageHeight = avatar.naturalHeight * scale;
+      context.drawImage(avatar, avatarX - imageWidth / 2, avatarY - avatarRadius, imageWidth, imageHeight);
+    } else {
+      context.fillStyle = "#dbe6ff";
+      context.font = '800 17px "Segoe UI", sans-serif';
+      context.textAlign = "center";
+      context.fillText(getInitials(player.player_name), avatarX, avatarY + 6);
+    }
+    context.restore();
+    context.beginPath();
+    context.arc(avatarX, avatarY, avatarRadius, 0, Math.PI * 2);
+    context.strokeStyle = index < 3 ? "rgba(245,200,75,.7)" : "rgba(151,181,242,.38)";
+    context.lineWidth = 2;
+    context.stroke();
+
     context.textAlign = "left";
     context.fillStyle = "#fff";
     context.font = '750 21px "Segoe UI", sans-serif';
-    context.fillText(fitText(context, player.player_name, 245), x + 90, y + 37);
+    context.fillText(fitText(context, player.player_name, 205), x + 150, y + 37);
     context.fillStyle = "rgba(219,229,255,.68)";
     context.font = '600 14px "Segoe UI", sans-serif';
-    context.fillText(`Г ${player.goals} · А ${player.assists} · ПГ ${player.pre_assists} · ВГ ${player.goal_influences}`, x + 90, y + 66);
+    context.fillText(`Г ${player.goals} · А ${player.assists} · ПГ ${player.pre_assists} · ВГ ${player.goal_influences}`, x + 150, y + 66);
     context.fillStyle = "#f5c84b";
     context.textAlign = "right";
     context.font = '800 24px "Segoe UI", sans-serif';
@@ -130,15 +186,6 @@ export function SeasonStatsBoard({ stats }: SeasonStatsBoardProps) {
   const bottomPlayer = rankedPlayers[rankedPlayers.length - 1] ?? null;
   const topScorer = [...stats].sort((a, b) => b.goals - a.goals || b.assists - a.assists)[0] ?? null;
   const topPlaymaker = [...stats].sort((a, b) => b.assists - a.assists || b.goals - a.goals)[0] ?? null;
-
-  function getInitials(name: string) {
-    return name
-      .split(" ")
-      .slice(0, 2)
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase();
-  }
 
   function renderAvatar(playerName: string, avatarUrl?: string | null) {
     const resolvedAvatar = getPlayerAvatarPath(playerName, avatarUrl);

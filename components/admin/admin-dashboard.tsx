@@ -826,6 +826,9 @@ export function AdminDashboard({
                 <p className="ui-note mt-2 text-sm">
                   Внесите голы, голевые, предголевые и ключевое участие без официального ассиста. После сохранения всё попадёт в статистику сезона.
                 </p>
+                <p className="mt-2 text-sm font-semibold text-[#f1d1db]">
+                  Порядок слева направо: голы → голевые передачи → предголевые → влияние на гол.
+                </p>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px]">
@@ -842,6 +845,13 @@ export function AdminDashboard({
 
               <div className="space-y-3">
                 <div className="space-y-2">
+                  <div className="hidden gap-3 px-4 md:grid md:grid-cols-[minmax(180px,1fr)_100px_100px_120px_150px]">
+                    <span className="meta-label text-xs">Игрок</span>
+                    <span className="meta-label text-xs">Голы</span>
+                    <span className="meta-label text-xs">Голевые</span>
+                    <span className="meta-label text-xs">Предголевые</span>
+                    <span className="meta-label text-xs">Влияние на гол</span>
+                  </div>
                   {selectedMatchPlayers.map((player) => {
                     const stat = matchPlayerStatForm[player.id] ?? { goals: "0", assists: "0", pre_assists: "0", goal_influences: "0" };
 
@@ -854,55 +864,75 @@ export function AdminDashboard({
                           </p>
                           <p className="ui-note mt-1 text-xs">{formatPlayerPosition(player.position)}</p>
                         </div>
-                        <input
-                          className="form-control"
-                          inputMode="numeric"
-                          placeholder="Голы"
-                          value={stat.goals}
-                          onChange={(e) =>
-                            setMatchPlayerStatForm((current) => ({
-                              ...current,
-                              [player.id]: { ...current[player.id], goals: e.target.value },
-                            }))
-                          }
-                        />
-                        <input
-                          className="form-control"
-                          inputMode="numeric"
-                          placeholder="Предголевые"
-                          value={stat.pre_assists}
-                          onChange={(e) =>
-                            setMatchPlayerStatForm((current) => ({
-                              ...current,
-                              [player.id]: { ...current[player.id], pre_assists: e.target.value },
-                            }))
-                          }
-                        />
-                        <input
-                          className="form-control"
-                          inputMode="numeric"
-                          placeholder="Влияние на гол"
-                          title="Ключевое действие без официального гола или голевой передачи"
-                          value={stat.goal_influences}
-                          onChange={(e) =>
-                            setMatchPlayerStatForm((current) => ({
-                              ...current,
-                              [player.id]: { ...current[player.id], goal_influences: e.target.value },
-                            }))
-                          }
-                        />
-                        <input
-                          className="form-control"
-                          inputMode="numeric"
-                          placeholder="Пасы"
-                          value={stat.assists}
-                          onChange={(e) =>
-                            setMatchPlayerStatForm((current) => ({
-                              ...current,
-                              [player.id]: { ...current[player.id], assists: e.target.value },
-                            }))
-                          }
-                        />
+                        <label className="space-y-1">
+                          <span className="meta-label text-[10px] md:sr-only">Голы</span>
+                          <input
+                            className="form-control"
+                            inputMode="numeric"
+                            min="0"
+                            placeholder="0"
+                            aria-label={`${player.player_name}: голы`}
+                            value={stat.goals}
+                            onChange={(e) =>
+                              setMatchPlayerStatForm((current) => ({
+                                ...current,
+                                [player.id]: { ...current[player.id], goals: e.target.value },
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="space-y-1">
+                          <span className="meta-label text-[10px] md:sr-only">Голевые передачи</span>
+                          <input
+                            className="form-control"
+                            inputMode="numeric"
+                            min="0"
+                            placeholder="0"
+                            aria-label={`${player.player_name}: голевые передачи`}
+                            value={stat.assists}
+                            onChange={(e) =>
+                              setMatchPlayerStatForm((current) => ({
+                                ...current,
+                                [player.id]: { ...current[player.id], assists: e.target.value },
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="space-y-1">
+                          <span className="meta-label text-[10px] md:sr-only">Предголевые передачи</span>
+                          <input
+                            className="form-control"
+                            inputMode="numeric"
+                            min="0"
+                            placeholder="0"
+                            aria-label={`${player.player_name}: предголевые передачи`}
+                            value={stat.pre_assists}
+                            onChange={(e) =>
+                              setMatchPlayerStatForm((current) => ({
+                                ...current,
+                                [player.id]: { ...current[player.id], pre_assists: e.target.value },
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="space-y-1">
+                          <span className="meta-label text-[10px] md:sr-only">Влияние на гол</span>
+                          <input
+                            className="form-control"
+                            inputMode="numeric"
+                            min="0"
+                            placeholder="0"
+                            aria-label={`${player.player_name}: влияние на гол`}
+                            title="Ключевое действие без официального гола или голевой передачи"
+                            value={stat.goal_influences}
+                            onChange={(e) =>
+                              setMatchPlayerStatForm((current) => ({
+                                ...current,
+                                [player.id]: { ...current[player.id], goal_influences: e.target.value },
+                              }))
+                            }
+                          />
+                        </label>
                       </div>
                     );
                   })}

@@ -15,6 +15,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const TACTICAL_FIELD_PATH = "/background/tactical-field-original.png";
+type PositionFilter = "ALL" | "GK" | "DF" | "MF" | "FW";
+
+const POSITION_FILTERS: Array<{ id: Exclude<PositionFilter, "ALL">; label: string }> = [
+  { id: "GK", label: "Вратари" },
+  { id: "DF", label: "Защита" },
+  { id: "MF", label: "Полузащита" },
+  { id: "FW", label: "Атака" },
+];
 
 const FORMATION_4231_LAYOUT: Array<{ x: number; y: number }> = [
   { x: 50, y: 90 },
@@ -147,6 +155,7 @@ export function LineupSelector({
   const [playerLayout, setPlayerLayout] = useState<TacticalBoardPosition[]>([]);
   const [savedLineup, setSavedLineup] = useState<LineupPredictionRecord | null>(null);
   const [draggingPlayerId, setDraggingPlayerId] = useState<string | null>(null);
+  const [positionFilter, setPositionFilter] = useState<PositionFilter>("ALL");
   const [exportingImage, setExportingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -157,6 +166,10 @@ export function LineupSelector({
   const canSave = isOpen && selectedCount === 11;
   const requiresAuth = backendEnabled;
   const selectablePlayers = useMemo(() => players.filter((player) => player.position !== "COACH"), [players]);
+  const visiblePlayers = useMemo(
+    () => positionFilter === "ALL" ? selectablePlayers : selectablePlayers.filter((player) => player.position === positionFilter),
+    [positionFilter, selectablePlayers],
+  );
 
   useEffect(() => {
     if (backendEnabled) {
@@ -495,8 +508,41 @@ export function LineupSelector({
           </p>
         </div>
 
+        <div className="space-y-2">
+          <div className="flex min-h-7 items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span>Быстрый выбор по позициям</span>
+            {positionFilter !== "ALL" ? (
+              <button type="button" className="font-semibold text-[#f1c75b] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f1c75b]" onClick={() => setPositionFilter("ALL")}>Показать всех</button>
+            ) : null}
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Фильтр игроков по позиции">
+            {POSITION_FILTERS.map((filter) => {
+              const total = selectablePlayers.filter((player) => player.position === filter.id).length;
+              const selected = selectedPlayers.filter((player) => player.position === filter.id).length;
+              const active = positionFilter === filter.id;
+              return (
+                <button
+                  key={filter.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setPositionFilter(active ? "ALL" : filter.id)}
+                  className={cn(
+                    "flex min-h-12 items-center justify-between gap-2 rounded-xl border px-3 text-left text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f1c75b]",
+                    active
+                      ? "border-accent/55 bg-gradient-to-br from-primary/25 to-accent/20 text-white"
+                      : "border-white/10 bg-white/[0.03] text-blue-100/75 hover:border-white/20 hover:text-white",
+                  )}
+                >
+                  <span className="truncate">{filter.label}</span>
+                  <small className="shrink-0 text-[10px] font-bold text-[#f1c75b]">{selected}/{total}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-          {selectablePlayers.map((player) => {
+          {visiblePlayers.map((player) => {
             const selected = selectedPlayerIds.includes(player.id);
             const avatarPath = getPlayerAvatarPath(player.player_name);
 

@@ -14,7 +14,13 @@ import {
   getStoredPlayerRankingsForUser,
   saveStoredPlayerRankings,
 } from "@/lib/player-rankings/storage";
-import { buildRankingSummaryByPlayer, getSeasonPointsFromRank, MAX_MATCH_RANKINGS } from "@/lib/player-rankings/stats";
+import {
+  buildRankingSummaryByPlayer,
+  getSeasonPointsFromRank,
+  isValidMatchRankingCount,
+  MAX_MATCH_RANKINGS,
+  MIN_MATCH_RANKINGS,
+} from "@/lib/player-rankings/stats";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { ensureProfileExists } from "@/lib/supabase/ensure-profile";
 import { cn } from "@/lib/utils";
@@ -163,6 +169,11 @@ export function PlayerRankings({
     () => orderedPlayerIds.map((id) => playedPlayersById.get(id)).filter((player): player is MatchPlayer => Boolean(player)),
     [orderedPlayerIds, playedPlayersById],
   );
+  const rankingRowsPerColumn = Math.ceil(orderedPlayers.length / 2);
+  const rankingColumns = [
+    orderedPlayers.slice(0, rankingRowsPerColumn),
+    orderedPlayers.slice(rankingRowsPerColumn),
+  ];
 
   const summaryByPlayerId = useMemo(
     () => buildRankingSummaryByPlayer(playedMatchPlayers, allRankings),
@@ -256,8 +267,8 @@ export function PlayerRankings({
       return;
     }
 
-    if (playedMatchPlayers.length !== MAX_MATCH_RANKINGS) {
-      setError("Для этого матча должен быть заполнен список из 16 сыгравших игроков.");
+    if (!isValidMatchRankingCount(playedMatchPlayers.length)) {
+      setError(`Для этого матча должен быть заполнен список из ${MIN_MATCH_RANKINGS}–${MAX_MATCH_RANKINGS} сыгравших игроков.`);
       return;
     }
 
@@ -346,8 +357,8 @@ export function PlayerRankings({
   }
 
   async function downloadRankingImage() {
-    if (orderedPlayers.length !== MAX_MATCH_RANKINGS) {
-      setError("Сначала заполните все 16 мест рейтинга.");
+    if (!isValidMatchRankingCount(orderedPlayers.length) || orderedPlayers.length !== playedMatchPlayers.length) {
+      setError(`Сначала заполните все места рейтинга — от ${MIN_MATCH_RANKINGS} до ${MAX_MATCH_RANKINGS}.`);
       return;
     }
 
@@ -401,14 +412,17 @@ export function PlayerRankings({
         try { return { player, image: await loadRankingImage(path) }; } catch { return { player, image: null }; }
       }));
 
+      const rowsPerColumn = Math.ceil(imageEntries.length / 2);
+      const rowHeight = Math.floor(982 / rowsPerColumn);
+      const cardHeight = Math.min(106, rowHeight - 12);
+
       imageEntries.forEach(({ player, image }, index) => {
-        // Read down each column: places 1–8 on the left, 9–16 on the right.
-        const column = index < 8 ? 0 : 1;
-        const row = index % 8;
+        const column = Math.floor(index / rowsPerColumn);
+        const row = index % rowsPerColumn;
         const x = column === 0 ? 54 : 550;
-        const y = 258 + row * 125;
+        const y = 258 + row * rowHeight;
         const width = 476;
-        const height = 106;
+        const height = cardHeight;
 
         roundedRect(context, x, y, width, height, 20);
         context.fillStyle = index < 3 ? "rgba(35, 65, 140, 0.74)" : "rgba(8, 19, 49, 0.78)";
@@ -471,7 +485,7 @@ export function PlayerRankings({
       context.textAlign = "left";
       context.fillStyle = "rgba(221, 229, 255, 0.62)";
       context.font = '600 18px "Segoe UI", sans-serif';
-      context.fillText("1 место — лучший игрок матча · 16 место — наименьшее влияние", 64, 1303);
+      context.fillText(`1 место — лучший игрок матча · ${rankingSnapshot.length} место — наименьшее влияние`, 64, 1303);
       context.textAlign = "right";
       context.fillStyle = "#f2c85b";
       context.fillText("barcaplatform", 1016, 1303);
@@ -497,7 +511,7 @@ export function PlayerRankings({
       <CardHeader>
         <CardTitle>Кто был лучшим в матче</CardTitle>
         <CardDescription>
-          Расставьте 16 сыгравших футболистов сверху вниз: 1 место — лучший игрок матча, 16 место — тот, кто повлиял меньше всех.
+          Расставьте всех сыгравших футболистов сверху вниз: 1 место — лучший игрок матча, последнее — тот, кто повлиял меньше всех.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -515,9 +529,9 @@ export function PlayerRankings({
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-muted-foreground">
             Список сыгравших игроков для этого матча ещё не заполнен.
           </div>
-        ) : playedMatchPlayers.length !== MAX_MATCH_RANKINGS ? (
+        ) : !isValidMatchRankingCount(playedMatchPlayers.length) ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-muted-foreground">
-            Для этого матча должен быть заполнен список из 16 сыгравших игроков.
+            Для этого матча должен быть заполнен список из {MIN_MATCH_RANKINGS}–{MAX_MATCH_RANKINGS} сыгравших игроков.
           </div>
         ) : (
           <>
@@ -546,59 +560,56 @@ export function PlayerRankings({
 
             {viewMode === "table" ? (
               <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
-                <div className="grid gap-2 md:grid-flow-col md:grid-cols-2 md:grid-rows-8">
-                  {orderedPlayers.map((player, index) => {
-                    const points = getSeasonPointsFromRank(index + 1);
-                    const avatarPath = getPlayerAvatarPath(player.player_name);
+                <div className="grid gap-2 md:grid-cols-2">
+                  {rankingColumns.map((column, columnIndex) => (
+                    <div key={`ranking-column-${columnIndex}`} className="space-y-2">
+                      {column.map((player, rowIndex) => {
+                        const index = columnIndex * rankingRowsPerColumn + rowIndex;
+                        const points = getSeasonPointsFromRank(index + 1, playedMatchPlayers.length);
+                        const avatarPath = getPlayerAvatarPath(player.player_name);
 
-                    return (
-                      <div
-                        key={`slot-${index + 1}`}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] p-3"
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="shrink-0">
-                            <p className="meta-label text-[10px]">Место {index + 1}</p>
-                            <p className="ui-value mt-1 text-sm">{points} очков за матч</p>
-                          </div>
-                          <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/15 bg-[#0a1738] p-1.5 transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15 sm:w-[250px]">
-                            <div
-                              className="club-avatar h-9 w-9 shrink-0 rounded-lg bg-cover bg-top text-[10px]"
-                              style={avatarPath ? { backgroundImage: `url(${avatarPath})` } : undefined}
-                              aria-hidden="true"
-                            >
-                              {avatarPath ? null : getInitials(player.player_name)}
-                            </div>
-                            <select
-                              aria-label={`Игрок на ${index + 1} месте`}
-                              value={player.id}
-                              onChange={(event) => handleAssignRankBySlot(index, event.target.value)}
-                              className="min-w-0 flex-1 cursor-pointer bg-transparent px-1 py-2 text-sm font-semibold text-white outline-none"
-                              style={{ colorScheme: "dark" }}
-                            >
-                              {playedMatchPlayers.map((optionPlayer) => (
-                                <option
-                                  key={optionPlayer.id}
-                                  value={optionPlayer.id}
-                                  className="bg-[#081535] text-white"
-                                  style={{ backgroundColor: "#081535", color: "#ffffff" }}
+                        return (
+                          <div key={`slot-${index + 1}`} className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="shrink-0">
+                                <p className="meta-label text-[10px]">Место {index + 1}</p>
+                                <p className="ui-value mt-1 text-sm">{points} очков за матч</p>
+                              </div>
+                              <div className="flex min-w-0 items-center gap-2 rounded-xl border border-white/15 bg-[#0a1738] p-1.5 transition focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/15 sm:w-[250px]">
+                                <div
+                                  className="club-avatar h-9 w-9 shrink-0 rounded-lg bg-cover bg-top text-[10px]"
+                                  style={avatarPath ? { backgroundImage: `url(${avatarPath})` } : undefined}
+                                  aria-hidden="true"
                                 >
-                                  {optionPlayer.player_name}
-                                </option>
-                              ))}
-                            </select>
+                                  {avatarPath ? null : getInitials(player.player_name)}
+                                </div>
+                                <select
+                                  aria-label={`Игрок на ${index + 1} месте`}
+                                  value={player.id}
+                                  onChange={(event) => handleAssignRankBySlot(index, event.target.value)}
+                                  className="min-w-0 flex-1 cursor-pointer bg-transparent px-1 py-2 text-sm font-semibold text-white outline-none"
+                                  style={{ colorScheme: "dark" }}
+                                >
+                                  {playedMatchPlayers.map((optionPlayer) => (
+                                    <option key={optionPlayer.id} value={optionPlayer.id} className="bg-[#081535] text-white" style={{ backgroundColor: "#081535", color: "#ffffff" }}>
+                                      {optionPlayer.player_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
               <div className="space-y-3">
                 {orderedPlayers.map((player, index) => {
                   const summary = summaryByPlayerId.get(player.id);
-                  const points = getSeasonPointsFromRank(index + 1);
+                  const points = getSeasonPointsFromRank(index + 1, playedMatchPlayers.length);
                   const avatarPath = getPlayerAvatarPath(player.player_name);
 
                   return (
@@ -692,8 +703,8 @@ export function PlayerRankings({
             disabled={
               saving ||
               !rankingAvailable ||
-              playedMatchPlayers.length !== MAX_MATCH_RANKINGS ||
-              orderedPlayers.length !== MAX_MATCH_RANKINGS ||
+              !isValidMatchRankingCount(playedMatchPlayers.length) ||
+              orderedPlayers.length !== playedMatchPlayers.length ||
               (backendEnabled && !currentUserId)
             }
           >
@@ -703,7 +714,7 @@ export function PlayerRankings({
             className="w-full"
             variant="outline"
             onClick={() => void downloadRankingImage()}
-            disabled={exportingImage || orderedPlayers.length !== MAX_MATCH_RANKINGS}
+            disabled={exportingImage || !isValidMatchRankingCount(orderedPlayers.length) || orderedPlayers.length !== playedMatchPlayers.length}
           >
             <Download className="mr-2 h-4 w-4" />
             {exportingImage ? "Создаём карточку..." : "Скачать карточку рейтинга"}

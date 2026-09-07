@@ -32,6 +32,7 @@ const currentSquad = [
   { player_id: "player-alex-gonzalez", player_name: "Алекс Гонсалес", player_number: null, position: "FW" },
   { player_id: "player-iker-rodriguez", player_name: "Икер Родригес", player_number: null, position: "GK" },
   { player_id: "player-hamza-abdelkarim", player_name: "Хамза Абделькарим", player_number: 29, position: "FW" },
+  { player_id: "player-gabriel-jesus", player_name: "Габриэль Жезус", player_number: 9, position: "FW" },
   { player_id: "coach-hansi-flick", player_name: "Ханси Флик", player_number: null, position: "COACH" },
 ] as const;
 

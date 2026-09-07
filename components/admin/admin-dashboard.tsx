@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChallengeAdminPanel } from "@/components/admin/challenge-admin-panel";
 import { SECTION_BACKGROUNDS, createPhotoPanelStyle } from "@/lib/backgrounds";
 import { formatMatchDate } from "@/lib/format";
+import { isValidMatchRankingCount, MAX_MATCH_RANKINGS, MIN_MATCH_RANKINGS } from "@/lib/player-rankings/stats";
 import { formatPlayerPosition } from "@/lib/players/format";
 import { createSupabaseClient } from "@/lib/supabase/client";
 import { formatTransferDirection, formatTransferStatus } from "@/lib/transfers/format";
@@ -272,8 +273,8 @@ export function AdminDashboard({
         return current.filter((id) => id !== matchPlayerId);
       }
 
-      if (current.length >= 16) {
-        setError("Для послематчевого рейтинга нужно выбрать ровно 16 сыгравших игроков.");
+      if (current.length >= MAX_MATCH_RANKINGS) {
+        setError(`Можно выбрать максимум ${MAX_MATCH_RANKINGS} сыгравших игроков.`);
         return current;
       }
 
@@ -390,8 +391,8 @@ export function AdminDashboard({
       return;
     }
 
-    if (selectedPlayedPlayerIds.length !== 16) {
-      setError("Чтобы пользователи могли ранжировать игроков, выберите ровно 16 сыгравших.");
+    if (!isValidMatchRankingCount(selectedPlayedPlayerIds.length)) {
+      setError(`Чтобы открыть рейтинг, выберите от ${MIN_MATCH_RANKINGS} до ${MAX_MATCH_RANKINGS} сыгравших игроков.`);
       setSavingSection(null);
       return;
     }
@@ -752,7 +753,7 @@ export function AdminDashboard({
             <p className="meta-label text-xs">Матчи</p>
             <h3 className="ui-value mt-2 text-xl font-semibold">Сыгравшие игроки после матча</h3>
             <p className="ui-note mt-2 text-sm">
-              Выберите матч и отметьте 16 футболистов, которые реально выходили на поле. После этого на странице матча откроется рейтинг лучших и худших игроков.
+              Выберите матч и отметьте от {MIN_MATCH_RANKINGS} до {MAX_MATCH_RANKINGS} футболистов, которые реально выходили на поле. После этого на странице матча откроется рейтинг лучших и худших игроков.
             </p>
           </div>
 
@@ -776,7 +777,7 @@ export function AdminDashboard({
                 </p>
                 <p className="mt-1">{formatMatchDate(selectedMatch.kickoff_at)} · {selectedMatch.venue}</p>
                 <p className="mt-2">
-                  Отмечено сыгравших: <span className="ui-value">{selectedPlayedPlayerIds.length}</span> из 16
+                  Отмечено сыгравших: <span className="ui-value">{selectedPlayedPlayerIds.length}</span> · допустимо {MIN_MATCH_RANKINGS}–{MAX_MATCH_RANKINGS}
                 </p>
               </div>
             ) : null}
@@ -949,7 +950,7 @@ export function AdminDashboard({
                 Выбрать стартовые 11
               </Button>
               <Button type="button" variant="outline" onClick={fillBenchPlayers}>
-                Добрать 5 замен
+                Добрать до 16
               </Button>
               <Button type="button" variant="ghost" onClick={clearPlayedPlayers}>
                 Очистить выбор
@@ -992,7 +993,7 @@ export function AdminDashboard({
               ))}
             </div>
 
-            <Button className="w-full" variant="secondary" disabled={savingSection === "played" || selectedPlayedPlayerIds.length !== 16}>
+            <Button className="w-full" variant="secondary" disabled={savingSection === "played" || !isValidMatchRankingCount(selectedPlayedPlayerIds.length)}>
               {savingSection === "played" ? "Сохраняем..." : "Сохранить сыгравших игроков"}
             </Button>
           </form>

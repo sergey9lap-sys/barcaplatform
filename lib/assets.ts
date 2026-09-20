@@ -5,6 +5,7 @@ function playerAsset(fileName: string) {
 const PLAYER_AVATARS: Record<string, string> = {
   "Жоан Гарсия": playerAsset("joan-garcia-2026.jpg"),
   "Войцех Щенсны": playerAsset("szczesny-2026.jpg"),
+  "Доминик Ливакович": playerAsset("livakovic-2026.png"),
   "Эдер Аллер": playerAsset("эдер аллер.jpg"),
   "Жоау Канселу": playerAsset("cancelo-2026.png"),
   "Алехандро Бальде": playerAsset("balde-2026.jpg"),

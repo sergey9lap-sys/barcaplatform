@@ -3,8 +3,9 @@ import type { MatchPlayer } from "@/types/database";
 const createdAt = new Date().toISOString();
 
 const currentSquad = [
-  { player_id: "player-joan-garcia", player_name: "Жоан Гарсия", player_number: 13, position: "GK" },
-  { player_id: "player-wojciech-szczesny", player_name: "Войцех Щенсны", player_number: 25, position: "GK" },
+  { player_id: "player-joan-garcia", player_name: "Жоан Гарсия", player_number: 1, position: "GK" },
+  { player_id: "player-wojciech-szczesny", player_name: "Войцех Щенсны", player_number: 13, position: "GK" },
+  { player_id: "player-dominik-livakovic", player_name: "Доминик Ливакович", player_number: 25, position: "GK" },
   { player_id: "player-alejandro-balde", player_name: "Алехандро Бальде", player_number: 3, position: "DF" },
   { player_id: "player-pau-cubarsi", player_name: "Пау Кубарси", player_number: 5, position: "DF" },
   { player_id: "player-andreas-christensen", player_name: "Андреас Кристенсен", player_number: 15, position: "DF" },
@@ -41,6 +42,17 @@ const matchIds = [
   "26000000-0000-4000-8000-000000000002",
   "26000000-0000-4000-8000-000000000003",
   "26000000-0000-4000-8000-000000000004",
+  "26000000-0000-4000-8000-000000000005",
+  "26000000-0000-4000-8000-000000000006",
+  "26000000-0000-4000-8000-000000000007",
+  "26000000-0000-4000-8000-000000000008",
+  "26000000-0000-4000-8000-000000000009",
+  "26000000-0000-4000-8000-000000000010",
+  "26000000-0000-4000-8000-000000000011",
+  "26000000-0000-4000-8000-000000000012",
+  "26000000-0000-4000-8000-000000000013",
+  "26000000-0000-4000-8000-000000000014",
+  "26000000-0000-4000-8000-000000000015",
 ] as const;
 
 export const mockMatchPlayers: MatchPlayer[] = matchIds.flatMap((matchId, matchIndex) =>

@@ -190,7 +190,8 @@ export async function getUpcomingMatches(limit?: number) {
   noStore();
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    const matches = mockMatches.filter((match) => match.status === "upcoming");
+    const now = Date.now();
+    const matches = mockMatches.filter((match) => match.status === "upcoming" && new Date(match.kickoff_at).getTime() >= now);
     return limit ? matches.slice(0, limit) : matches;
   }
 
@@ -209,7 +210,8 @@ export async function getUpcomingMatches(limit?: number) {
   const matches = (data as Match[] | null) ?? [];
 
   if (!matches.length) {
-    const fallbackMatches = mockMatches.filter((match) => match.status === "upcoming");
+    const now = Date.now();
+    const fallbackMatches = mockMatches.filter((match) => match.status === "upcoming" && new Date(match.kickoff_at).getTime() >= now);
     return limit ? fallbackMatches.slice(0, limit) : fallbackMatches;
   }
 
